@@ -14,7 +14,6 @@ join_request_model = api.model('Join Request', {'uid': fields.String('The Device
 access_request_model = api.model('Access Request', {'email': fields.String('Your HU Email.')})
 
 # API Route Definitions
-
 @api.route('/join')
 class Join(Resource):
     @api.expect(join_request_model)
@@ -65,6 +64,5 @@ class Access(Resource):
 
 
 if __name__ == '__main__':
-
 
     app.run(debug=api_vars.API_DEBUG, port=api_vars.API_PORT, host=api_vars.API_IP)
