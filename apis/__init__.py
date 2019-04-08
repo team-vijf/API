@@ -17,13 +17,19 @@ authorizations = {
     }
 }
 
+motd = '''Welkom bij de Lokaalbezetting API. 
+Als je een gebruiker bent, vraag je een Access Key aan onder /access. 
+Sensor devices en Apps melden zich aan onder /join.'''
+
+
 api = Api(
     title='Lokaalbezetting API',
     version='0.1',
     doc='/',
     default='Global',
     default_label='Global endpoints that do not require a token to access',
-    authorizations=authorizations
+    authorizations=authorizations,
+    description=motd
 )
 
 api.add_namespace(private, path='/private')
