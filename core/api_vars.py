@@ -10,4 +10,4 @@ DB_USER = os.getenv('DB_USER', 'postgres')
 DB_PASSWORD = os.getenv('DB_PASSWORD', 'password')
 DB_NAME = os.getenv('DB_NAME', 'project')
 
-JOIN_TOKEN = 'secret'
+SHARED_SECRET = 'secret'

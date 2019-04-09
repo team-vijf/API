@@ -18,13 +18,13 @@ def token_required(f):
             return {'status': 'failed', 'error': 'This endpoint requires an access token'}, 401
 
         database = db.Database()
-        database.connect()
-        check = database.query('''SELECT * FROM tokens WHERE token = '{}';'''.format(token))
-        database.close()
-        if len(check) == 0:
-            return {'status': 'failed', 'error': 'Incorrect token'}, 401
+        matchedTokens = database.readToken(token=token, namespace='public')
+        if matchedTokens == False:
+            return {'status': 'failed', 'error': 'Could not check if token exists in database'}
+        else:
+            if len(matchedTokens) == 0:
+                return {'status': 'failed', 'error': 'Incorrect token'}, 401
         
-
         return f(*args, **kwargs)
 
     return decorated
@@ -32,7 +32,7 @@ def token_required(f):
 @api.route('/buildings')
 class Buildings(Resource):
 
-    @api.doc(security=['accessKey', 'joinKey'])
+    @api.doc(security=['Token'])
     @token_required
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
