@@ -9,9 +9,6 @@ app = Flask(__name__)
 
 api.init_app(app)
 
-# test123
-
-
 # API Model Definitions
 join_request_model = api.model('Join Request', {'uid': fields.String('The Device UID.'), 'join_token': fields.String('The Join Token.'), 'type': fields.String('Device/App')})
 access_request_model = api.model('Access Request', {'email': fields.String('Your HU Email.')})
