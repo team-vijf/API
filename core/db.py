@@ -1,48 +1,99 @@
 import psycopg2
-import sys
 from core import api_vars
-
+import sys
 
 class Database():
 
-    # Try to connect to the database
     def connect(self):
+
+        # Connect to the database using the variables set in core/api_vars.py
+        self.connection = psycopg2.connect(host=api_vars.DB_IP, 
+                                            port=api_vars.DB_PORT, 
+                                            user=api_vars.DB_USER, 
+                                            password=api_vars.DB_PASSWORD, 
+                                            dbname=api_vars.DB_NAME)
+        self.connection.autocommit = True
+
+    def writeToken(self, uid, type, token):
+
         try:
-            self.conn = psycopg2.connect(host=api_vars.DB_IP, 
-                                        port=api_vars.DB_PORT,
-                                        user=api_vars.DB_USER,
-                                        password=api_vars.DB_PASSWORD,
-                                        dbname=api_vars.DB_NAME)
-            self.conn.autocommit = True
+            self.connect()
+            cur = self.connection.cursor()
+
+
+            # Create the table to write the token to, if it didn't exist already
+            cur.execute('''CREATE TABLE IF NOT EXISTS tokens ( uid varchar(255) NOT NULL UNIQUE,
+                                                               type varchar(255) NOT NULL,
+                                                               token varchar(255) NOT NULL,
+                                                               time TIMESTAMP NOT NULL );''')
+            
+            # Check if token already exists, if it exists overwrite it
+            cur.execute('''SELECT * FROM tokens WHERE uid = '{}';'''.format(uid))
+            tokenExists = cur.fetchall()
+            if len(tokenExists) > 0:
+                cur.execute('''UPDATE tokens SET token = '{}', time = Now() WHERE uid = '{}';'''.format(token, uid))
+                return True
+
+            # If it didn't already exists: Insert the uid, type, token and timestamp in the database
+            cur.execute('''INSERT INTO tokens ( uid, type, token, time ) VALUES ('{}','{}','{}', Now());'''.format(uid, type, token))
+
+            # If it succeeded
+            return True
 
         except Exception as err:
-            sys.stderr('Could not connect to DB, error: {}'.format(err))
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
 
-    # Try to gracefully close the connection
-    def close(self):
+    def readToken(self, token, namespace):
+
         try:
-            if self.conn:
-                self.conn.close()
-        except:
-            pass
+            self.connect()
+            cur = self.connection.cursor()
 
-    # Try to query the database
-    def query(self, query):
-        try:
-            self.cursor = self.conn.cursor()
-            self.cursor.execute(query)
-
-            try:
-                result = self.cursor.fetchall()
-                return result
-            except:
-                pass
+            if namespace == 'public':
+                cur.execute('''SELECT * FROM tokens WHERE token = '{}';'''.format(token))
+                return cur.fetchall()
+            elif namespace == 'private':
+                cur.execute('''SELECT * FROM tokens WHERE token = '{}' AND type = 'device' OR type = 'app';'''.format(token))
+                return cur.fetchall()
 
         except Exception as err:
-            try:
-                if self.conn:
-                    self.conn.rollback()
-            except:
-                pass
-            finally:
-                sys.stderr('Could not execute query, error: {}'.format(err))
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
+
+    def readConfig(self, token):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            # Create the table to write the token to, if it didn't exist already
+            cur.execute('''CREATE TABLE IF NOT EXISTS configs ( uid varchar(255) NOT NULL UNIQUE,
+                                                                location varchar(255),
+                                                                config JSON,
+                                                                last_updated TIMESTAMP NOT NULL );''')
+
+            # Get UID from token
+            cur.execute('''SELECT uid FROM tokens WHERE token = '{}';'''.format(token))
+            uid = cur.fetchone()[0]
+
+            # Check if device has a device-specific config
+            cur.execute('''SELECT * FROM configs WHERE uid = '{}';'''.format(uid))
+            configExists = cur.fetchall()
+
+            # If it already exists, return the config
+            if len(configExists) > 0:
+                return {'location': configExists[0][1], 'configs': configExists[0][2]}
+                
+            # If it didn't exist, create a config
+            cur.execute('''INSERT INTO configs ( uid, config, last_updated ) values ( '{}', Null, Now() ) ;'''.format(uid))
+            
+            cur.execute('''SELECT * FROM configs WHERE uid = '{}';'''.format(uid))
+            config = cur.fetchall()
+
+            return {'location': config[0][1], 'configs': config[0][2]}
+
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False

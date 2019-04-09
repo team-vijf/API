@@ -1,65 +1,88 @@
-from flask import Flask
+from flask import Flask, render_template, url_for
 from flask_restplus import Api, Resource, fields
 from apis import api
 from core import db
 from core import api_vars
 import secrets
 
-app = Flask(__name__)
-
+app = Flask(__name__, template_folder='html')
 api.init_app(app)
 
-# API Model Definitions
-join_request_model = api.model('Join Request', {'uid': fields.String('The Device UID.'), 'join_token': fields.String('The Join Token.'), 'type': fields.String('Device/App')})
-access_request_model = api.model('Access Request', {'email': fields.String('Your HU Email.')})
+# We define models so we can define what the API has to expect for certain endpoints
+private_access_request = api.model('Private Access Request', {'uid': fields.String('A unique identifier.'), 'shared_secret': fields.String('The shared secret.'), 'type': fields.String('Can either be device or app.')})
+public_access_request = api.model('Public Access Request', {'email': fields.String('Your HU Email.')})
 
-# API Route Definitions
-@api.route('/join')
-class Join(Resource):
-    @api.expect(join_request_model)
+@api.route('/access/private')
+class privateAccess(Resource):
+    '''
+    This endpoint is meant for sensor devices and web-app instances to register theirselves and get hold of an API Key.
+    They can use this API Key to write sensor-data, write logs and do other operations that require security.
+    '''
+
+    @api.expect(private_access_request)
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
     def post(self):
-        if api.payload['join_token'] == api_vars.JOIN_TOKEN:
 
+        # If the provided shared_secret is correct (According to core/api_vars)
+        if api.payload['shared_secret'] == api_vars.SHARED_SECRET:
+
+            # If the type is not device or app, then return an error
             if api.payload['type'] != 'device' and api.payload['type'] != 'app':
                 return {'status': 'failed', 'error': 'Type can only be device or app'}
 
-            access_token = secrets.token_hex(40)
+            # Generate a 40 character token
+            token = secrets.token_hex(40)
 
+            # Try to write the token to the database
             database = db.Database()
-            database.connect()
-            database.query('''CREATE TABLE IF NOT EXISTS tokens ( uid varchar(255),
-                                                                  type varchar(255),
-                                                                  token varchar(255),
-                                                                  time TIMESTAMP );''')
-            database.query('''INSERT INTO tokens VALUES ('{}','{}','{}', Now());'''.format(api.payload['uid'], api.payload['type'], access_token))
-            database.close()
-            
-            return {'status': 'ok', 'access_token': access_token}
+            if database.writeToken(uid=api.payload['uid'], type=api.payload['type'], token=token):
+                # If the operation was successful
+                return {'status': 'ok', 'token': token}
 
+            else:
+                # If there was a database error
+                return {'status': 'failed', 'error': 'Could not write token to database'}
+
+        # If the join_token was incorrect
         else:
-            return {'status': 'failed', 'error': 'Incorrect join token.'}
+            return {'status': 'failed', 'error': 'Incorrect shared secret.'}, 401
 
 
-@api.route('/access')
-class Access(Resource):
+@api.route('/access/public')
+class publicAccess(Resource):
+    '''
+    This endpoint is meant for users that seek to access information such as room-occupation via the API.
+    We created this endpoint besides the webapp so that users can build upon the data we collect.
+    '''
 
-    @api.expect(access_request_model)
+    @api.expect(public_access_request)
     def post(self):
-        if '@student.hu.' in api.payload['email']:
 
-            access_token = secrets.token_hex(40)
+        # We only want students and staff of the HU to be able to apply for an access token
+        if '@student.hu.' in api.payload['email'] or '@hu.' in api.payload['email']:
 
+            # Generate a 40 character token
+            token = secrets.token_hex(40)
+
+            # Try to write the token to the database
             database = db.Database()
-            database.connect()
-            database.query('''CREATE TABLE IF NOT EXISTS tokens ( uid varchar(255),
-                                                                  type varchar(255),
-                                                                  token varchar(255),
-                                                                  time TIMESTAMP );''')
-            database.query('''INSERT INTO tokens VALUES ('{}','{}','{}', Now());'''.format(api.payload['email'], 'user', access_token))
-            database.close()
-            return {'status': 'ok', 'access_token': access_token}
+            if database.writeToken(uid=api.payload['email'], type='user', token=token):
+                # If the operation was successful
+                return {'status': 'ok', 'token': token}
+
+            else:
+                # If there was a database error
+                return {'status': 'failed', 'error': 'Could not write token to database'}
+            
+        # If the email wasn't of a HU student / staffmember
         else:
-            return {'status': 'failed', 'error': 'You can only apply for an access token with a HU email account.'}
+            return {'status': 'failed', 'error': 'You can only apply for an access token with a HU email account.'}, 401
+
+@app.route('/admin')
+def index():
+
+    return render_template('index.html')
 
 
 
