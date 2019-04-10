@@ -4,6 +4,12 @@ import sys
 
 class Database():
 
+    def __init__(self):
+        structureExists = self.query('''SELECT to_regclass('public.buildings');''')
+        print(len(structureExists))
+        if len(structureExists) < 1:
+            self.query(open('project.sql', 'r').read())
+
     def connect(self):
 
         # Connect to the database using the variables set in core/api_vars.py
@@ -13,6 +19,38 @@ class Database():
                                            password=api_vars.DB_PASSWORD, 
                                            dbname=api_vars.DB_NAME)
         self.connection.autocommit = True
+
+    def addBuilding(self, name, streetName, buildingNumber):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            cur.execute('''INSERT INTO buildings ( name, streetname, buildingnumber) VALUES ( '{}', '{}', '{}' )'''.format(name,
+                                                                                                                           streetName,
+                                                                                                                           buildingNumber))
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
+
+
+    def query(self, query):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            cur.execute(query)
+            try:
+                result = cur.fetchall()
+                return result
+            except:
+                return True
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
+
 
     def writeToken(self, uid, type, token):
 

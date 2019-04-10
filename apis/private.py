@@ -5,6 +5,9 @@ from flask import request
 
 api = Namespace('Private', description='The private side of the Lokaalbezetting API')
 
+newBuilding = api.model('New Building', {'name': fields.String('Name of the building, e.g. HL15'), 'streetname': fields.String('Streetname, e.g. Heidelberglaan'), 'buildingnumber': fields.String('Building number, e.g. 15')})
+
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -51,3 +54,24 @@ class config(Resource):
             return {'status': 'failed', 'error': 'Could not retrieve config from database'}
 
         return {'status': 'ok', 'config': config}
+
+@api.route('/buildings/new')
+class newBuilding(Resource):
+
+    @api.doc(security='Token')
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(newBuilding)
+    def post(self):
+
+        print(api.payload)
+
+        if 'name' not in api.payload or 'streetname' not in api.payload or 'buildingnumber' not in api.payload:
+            return {'status': 'failed', 'error': 'You have to provide name, streetname and buildingnumber'}
+
+        database = db.Database()
+        database.addBuilding(name=api.payload['name'], streetName=api.payload['streetname'], buildingNumber=api.payload['buildingnumber'])
+
+        return {'status': 'ok'}
+

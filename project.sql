@@ -3,9 +3,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS buildings(
 	id uuid DEFAULT uuid_generate_v4(),
-	name varchar(255) NOT NULL,
-	streetName varchar(255) NOT NULL,
-	buildingNumber varchar(255) NOT NULL,
+	name varchar(20) NOT NULL,
+	streetName varchar(30) NOT NULL,
+	buildingNumber SMALLINT NOT NULL,
 	CONSTRAINT buildings_pk PRIMARY KEY (id)
 );
 
@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS floors(
 	id uuid DEFAULT uuid_generate_v4(),
 	floorNumber varchar(255) NOT NULL,
 	id_buildings uuid NOT NULL,
-	name_buildings varchar(255) NOT NULL
 	CONSTRAINT floors_pk PRIMARY KEY (id)
 
 );
@@ -27,8 +26,8 @@ ALTER TABLE floors OWNER TO postgres;
 -- object: classrooms | type: TABLE --
 -- DROP TABLE IF EXISTS classrooms CASCADE;
 CREATE TABLE IF NOT EXISTS classrooms(
-	classcode varchar(255) NOT NULL,
-	id_floors varchar(255) NOT NULL,
+	classcode varchar(10) NOT NULL,
+	id_floors uuid NOT NULL,
 	CONSTRAINT classrooms_pk PRIMARY KEY (classcode)
 );
 -- ddl-end --
@@ -36,9 +35,9 @@ ALTER TABLE classrooms OWNER TO postgres;
 -- ddl-end --
 
 CREATE TABLE IF NOT EXISTS occupation(
+	classcode varchar(10) NOT NULL,
 	time TIMESTAMP NOT NULL,
-	classcode varchar(255) NOT NULL,
-	free varchar(255) NOT NULL
+	free boolean NOT NULL
 );
 
 ALTER TABLE occupation OWNER TO postgres;
