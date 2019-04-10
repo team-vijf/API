@@ -1,11 +1,13 @@
 from flask import Flask, render_template, url_for
 from flask_restplus import Api, Resource, fields
+from flask_cors import CORS
 from apis import api
 from core import db
 from core import api_vars
 import secrets
 
 app = Flask(__name__, template_folder='html')
+CORS(app)
 api.init_app(app)
 
 # We define models so we can define what the API has to expect for certain endpoints
