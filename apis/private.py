@@ -71,6 +71,8 @@ class newBuilding(Resource):
             return {'status': 'failed', 'error': 'You have to provide name, streetname and buildingnumber'}
 
         database = db.Database()
+        
+
         database.addBuilding(name=api.payload['name'], streetName=api.payload['streetname'], buildingNumber=api.payload['buildingnumber'])
 
         return {'status': 'ok'}

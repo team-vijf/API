@@ -5,9 +5,8 @@ import sys
 class Database():
 
     def __init__(self):
-        structureExists = self.query('''SELECT to_regclass('public.buildings');''')
-        print(len(structureExists))
-        if len(structureExists) < 1:
+        structureExists = self.query('''SELECT EXISTS (SELECT * FROM information_schema.tables where table_name='buildings' );''')
+        if not structureExists[0][0]:
             self.query(open('project.sql', 'r').read())
 
     def connect(self):
