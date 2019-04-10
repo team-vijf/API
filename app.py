@@ -90,4 +90,4 @@ def index():
 
 if __name__ == '__main__':
 
-    app.run(debug=api_vars.API_DEBUG, port=api_vars.API_PORT, host=api_vars.API_IP, ssl_context='adhoc')
+    app.run(debug=api_vars.API_DEBUG, port=api_vars.API_PORT, host=api_vars.API_IP)

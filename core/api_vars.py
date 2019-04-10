@@ -1,6 +1,6 @@
 import os
 
-API_PORT = os.getenv('API_PORT', '5000')
+API_PORT = os.getenv('API_PORT', '80')
 API_IP = os.getenv('API_IP', '0.0.0.0')
 API_DEBUG = os.getenv('API_DEBUG', True)
 
