@@ -71,7 +71,12 @@ class newBuilding(Resource):
             return {'status': 'failed', 'error': 'You have to provide name, streetname and buildingnumber'}
 
         database = db.Database()
-        
+        try:
+            result = database.query('''SELECT * FROM buildings WHERE name = {}'''.format(api.payload['name']))
+            print(result)
+
+        except:
+            pass
 
         database.addBuilding(name=api.payload['name'], streetName=api.payload['streetname'], buildingNumber=api.payload['buildingnumber'])
 
