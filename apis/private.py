@@ -72,8 +72,9 @@ class newBuilding(Resource):
 
         database = db.Database()
         try:
-            result = database.query('''SELECT * FROM buildings WHERE name = {}'''.format(api.payload['name']))
-            print(result)
+            result = database.query('''SELECT * FROM buildings WHERE name = '{}';'''.format(api.payload['name']))
+            if len(result) > 0:
+                return {'status': 'failed', 'error': 'Building with name {} already exists.'.format(api.payload['name'])}
 
         except:
             pass
