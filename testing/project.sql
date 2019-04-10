@@ -1,38 +1,22 @@
--- Database generated with pgModeler (PostgreSQL Database Modeler).
--- pgModeler  version: 0.9.1
--- PostgreSQL version: 10.0
--- Project Site: pgmodeler.io
--- Model Author: ---
+-- Start the postgres uuid extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-
--- Database creation must be done outside a multicommand file.
--- These commands were put in this file only as a convenience.
--- -- object: new_database | type: DATABASE --
--- -- DROP DATABASE IF EXISTS new_database;
--- CREATE DATABASE new_database;
--- -- ddl-end --
--- 
-
--- object: buildings | type: TABLE --
--- DROP TABLE IF EXISTS buildings CASCADE;
 CREATE TABLE IF NOT EXISTS buildings(
-	id varchar(255) NOT NULL UNIQUE,
+	id uuid DEFAULT uuid_generate_v4(),
 	name varchar(255) NOT NULL,
 	streetName varchar(255) NOT NULL,
 	buildingNumber varchar(255) NOT NULL,
 	CONSTRAINT buildings_pk PRIMARY KEY (id)
-
 );
--- ddl-end --
-ALTER TABLE buildings OWNER TO postgres;
--- ddl-end --
 
--- object: floors | type: TABLE --
--- DROP TABLE IF EXISTS floors CASCADE;
+ALTER TABLE buildings OWNER TO postgres;
+
+
 CREATE TABLE IF NOT EXISTS floors(
-	id varchar(255) NOT NULL UNIQUE,
+	id uuid DEFAULT uuid_generate_v4(),
 	floorNumber varchar(255) NOT NULL,
-	id_buildings varchar(255) NOT NULL,
+	id_buildings uuid NOT NULL,
+	name_buildings varchar(255) NOT NULL
 	CONSTRAINT floors_pk PRIMARY KEY (id)
 
 );

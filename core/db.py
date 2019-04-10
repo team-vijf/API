@@ -8,10 +8,10 @@ class Database():
 
         # Connect to the database using the variables set in core/api_vars.py
         self.connection = psycopg2.connect(host=api_vars.DB_IP, 
-                                            port=api_vars.DB_PORT, 
-                                            user=api_vars.DB_USER, 
-                                            password=api_vars.DB_PASSWORD, 
-                                            dbname=api_vars.DB_NAME)
+                                           port=api_vars.DB_PORT, 
+                                           user=api_vars.DB_USER, 
+                                           password=api_vars.DB_PASSWORD, 
+                                           dbname=api_vars.DB_NAME)
         self.connection.autocommit = True
 
     def writeToken(self, uid, type, token):

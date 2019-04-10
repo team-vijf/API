@@ -2,16 +2,18 @@ from core import db
 
 buildings = [
     {"id": "GUID",
+     "name": "HL15",
      "streetName": "Heidelberglaan",
      "buildingNumber": "15"},
 
-    {"id": "buildingPL",
+    {"id": "GUID",
      "name": "PL101",
      "streetName": "Padualaan",
      "buildingNumber": "101"}]
 
 floors = [
-    {"floorNumber": "0",
+    {"id": "GUID",
+     "floorNumber": "0",
      "id": "lowerHL",
      "id_buildings": "HL15"},
 
