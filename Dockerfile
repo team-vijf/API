@@ -7,7 +7,7 @@ RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 80
+EXPOSE 5000
 
 COPY . .
 
