@@ -2,10 +2,15 @@ from flask_restplus import Namespace, Resource, fields
 from core import db
 from functools import wraps
 from flask import request
+import sys
 
 api = Namespace('Private', description='The private side of the Lokaalbezetting API')
 
-newBuilding = api.model('New Building', {'name': fields.String('Name of the building, e.g. HL15'), 'streetname': fields.String('Streetname, e.g. Heidelberglaan'), 'buildingnumber': fields.String('Building number, e.g. 15')})
+newBuilding = api.model('New Building', {'name': fields.String('Name of the building, e.g. HL15'), 'streetname': fields.String('Streetname, e.g. Heidelberglaan'), 'buildingnumber': fields.Integer('Building number, e.g. 15')})
+newFloor = api.model('New Floor', {'building_id': fields.String('UUID of the building this floor belongs to.'), 'floor_number': fields.String('Floor number')})
+newClassroom = api.model('New Classroom', {'classcode': fields.String('The classcode of the classroom.'), 'floor_id': fields.String('UUID of the floor this classroom belongs to.')})
+
+setLocation = api.model('Set Location', {'location': fields.String('Classcode of the location of the sensor device.')})
 
 
 def token_required(f):
@@ -55,6 +60,30 @@ class config(Resource):
 
         return {'status': 'ok', 'config': config}
 
+@api.route('/config/location/set')
+class setLocation(Resource):
+
+    @api.doc(security='Token')
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(setLocation)
+    def post(self):
+        
+        if 'location' not in api.payload:
+            return {'status': 'failed', 'error': 'You have to provide a classcode as location.'}
+
+        token = request.headers['X-API-KEY']
+
+        database = db.Database()
+        setConfig = database.setLocation(token=token, location=api.payload['location'])
+        
+        if setConfig == False:
+            return {'status': 'failed', 'error': 'Could not set location.'}
+
+        return {'status': 'ok'}
+
+
 @api.route('/buildings/new')
 class newBuilding(Resource):
 
@@ -70,6 +99,8 @@ class newBuilding(Resource):
         if 'name' not in api.payload or 'streetname' not in api.payload or 'buildingnumber' not in api.payload:
             return {'status': 'failed', 'error': 'You have to provide name, streetname and buildingnumber'}
 
+        # if api.payload['buildingnumber'] 
+
         database = db.Database()
         try:
             result = database.query('''SELECT * FROM buildings WHERE name = '{}';'''.format(api.payload['name']))
@@ -81,5 +112,84 @@ class newBuilding(Resource):
 
         database.addBuilding(name=api.payload['name'], streetName=api.payload['streetname'], buildingNumber=api.payload['buildingnumber'])
 
-        return {'status': 'ok'}
+        result = database.query('''SELECT * FROM buildings WHERE name = '{}';'''.format(api.payload['name']))
+        created = {'id': result[0][0], 'name': result[0][1], 'street_name': result[0][2], 'building_number': result[0][3]}
 
+        return {'status': 'ok', 'created': created}
+
+@api.route('/floors/new')
+class newBuilding(Resource):
+
+    @api.doc(security='Token')
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(newFloor)
+    def post(self):
+
+        if 'floor_number' not in api.payload or 'building_id' not in api.payload:
+            return {'status': 'failed', 'error': 'You have to provide floornumber and the uuid of the building that the floor belongs to.'}
+
+        database = db.Database()
+        try:
+            # Check if building exists
+            try:
+                result = database.query('''SELECT * FROM buildings WHERE id = '{}';'''.format(api.payload['building_id']))
+                if len(result) < 1:
+                    return {'status': 'failed', 'error': 'Building with UUID {} does not exist'.format(api.payload['building_id'])}
+            except:
+                return {'status': 'failed', 'error': 'Building with UUID {} does not exist'.format(api.payload['building_id'])}
+
+            # Check if floor already exists
+            result = database.query('''SELECT * FROM floors WHERE id_buildings = '{}' AND floornumber = '{}';'''.format(api.payload['building_id'], api.payload['floor_number']))
+            if len(result) > 0:
+                return {'status': 'failed', 'error': 'Floor already exists.'}
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+
+        database.addFloor(floorNumber=api.payload['floor_number'], buildingId=api.payload['building_id'])
+
+        result = database.query('''SELECT * FROM floors WHERE floornumber = '{}' AND id_buildings = '{}';'''.format(api.payload['floor_number'], api.payload['building_id']))
+        created = {'id': result[0][0], 'floor_number': result[0][1], 'building_id': result[0][2]}
+
+        return {'status': 'ok', 'created': created}
+
+@api.route('/classrooms/new')
+class newClassroom(Resource):
+
+    @api.doc(security='Token')
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(newClassroom)
+    def post(self):
+
+        if 'classcode' not in api.payload or 'floor_id' not in api.payload:
+            return {'status': 'failed', 'error': 'You have to provide the classcode of the classroom and the uuid of the floor that the classroom belongs to.'}
+
+        database = db.Database()
+
+        try:
+            # Check if floor exists
+            try:
+                result = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(api.payload['floor_id']))
+                if len(result) < 1:
+                    return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(api.payload['floor_id'])}
+            except:
+                return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(api.payload['floor_id'])}
+
+            # Check if classroom already exists
+            result = database.query('''SELECT * FROM classrooms WHERE id_floors = '{}' AND classcode = '{}';'''.format(api.payload['floor_id'], api.payload['classcode']))
+            if len(result) > 0:
+                return {'status': 'failed', 'error': 'Classroom already exists.'}
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+
+        database.addClassroom(classCode=api.payload['classcode'], floorId=api.payload['floor_id'])
+
+        result = database.query('''SELECT * FROM classrooms WHERE classcode = '{}' AND id_floors = '{}';'''.format(api.payload['classcode'], api.payload['floor_id']))
+        created = {'classcode': result[0][0], 'floor_id': result[0][1]}
+
+        return {'status': 'ok', 'created': created}

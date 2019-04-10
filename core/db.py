@@ -32,6 +32,29 @@ class Database():
             sys.stderr.write('Database Error: {}'.format(err))
             return False
 
+    def addFloor(self, floorNumber, buildingId):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            cur.execute('''INSERT INTO floors ( floornumber, id_buildings) VALUES ( '{}', '{}' );'''.format(floorNumber, buildingId))
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
+
+    def addClassroom(self, classCode, floorId):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            cur.execute('''INSERT INTO classrooms ( classcode, id_floors) VALUES ( '{}', '{}' );'''.format(classCode, floorId))
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
 
     def query(self, query):
 
@@ -49,6 +72,23 @@ class Database():
         except Exception as err:
             sys.stderr.write('Database Error: {}'.format(err))
             return False
+
+    def setLocation(self, token, location):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            # Get UID from token
+            cur.execute('''SELECT uid FROM tokens WHERE token = '{}';'''.format(token))
+            uid = cur.fetchone()[0]
+
+            cur.execute('''UPDATE configs SET location = '{}', last_updated = Now() WHERE uid = '{}';'''.format(location, uid))
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
+
 
 
     def writeToken(self, uid, type, token):

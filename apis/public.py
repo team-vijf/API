@@ -37,9 +37,24 @@ class Buildings(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
+
+        totalObject = []
         
-        ###
+        database = db.Database()
+        buildings = database.query('''SELECT * FROM buildings ORDER BY name;''')
 
-        buildings = []
+        for building in buildings:
+            buildingdict = dict()
+            buildingdict['id'] = building[0]
+            buildingdict['name'] = building[1]
+            buildingdict['streetname'] = building[2]
+            buildingdict['buildingnumber'] = building[3]
+            buildingdict['floors'] = []
+            totalObject.append(buildingdict)
 
-        return {'status': 'ok', 'buildings': buildings}
+        joined = database.query('''SELECT b.id, b.name, b.streetname, b.buildingnumber, f.id, f.floornumber, c.classcode
+                                   FROM buildings as b
+                                   INNER JOIN floors as f ON f.id_buildings = b.id
+                                   INNER JOIN classrooms as c ON c.id_floors = f.id;''')
+
+        return {'status': 'ok', 'buildings': totalObject}
