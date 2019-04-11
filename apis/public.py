@@ -29,7 +29,31 @@ def token_required(f):
 
     return decorated
 
-@api.route('/buildings')
+@api.route('/classrooms')
+class Classrooms(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    def get(self):
+
+        classrooms = []
+
+        database = db.Database()
+        classroomsQuery = database.query('''SELECT classcode FROM classrooms;''')
+
+        if classroomsQuery == False:
+            return {'status': 'failed', 'error': 'Could not get classrooms from database'}
+
+        for classroom in classroomsQuery:
+            classroomdict = dict()
+            classroomdict['classcode'] = classroom[0]
+            classrooms.append(classroomdict)
+
+        return {'status': 'ok', 'classrooms': classrooms}
+
+@api.route('/occupation/buildings')
 class Buildings(Resource):
 
     @api.doc(security=['Token'])

@@ -76,6 +76,14 @@ class setLocation(Resource):
         token = request.headers['X-API-KEY']
 
         database = db.Database()
+
+        try:
+            result = database.query('''SELECT * FROM classrooms WHERE classcode = '{}';'''.format(api.payload['location']))
+            if len(result) < 1:
+                return {'status': 'failed', 'error': 'Classroom with classcode: {} does not exist'.format(api.payload['location'])}
+        except:
+            return {'status': 'failed', 'error': 'Classroom with classcode: {} does not exist'.format(api.payload['location'])}
+
         setConfig = database.setLocation(token=token, location=api.payload['location'])
         
         if setConfig == False:
@@ -98,8 +106,6 @@ class newBuilding(Resource):
 
         if 'name' not in api.payload or 'streetname' not in api.payload or 'buildingnumber' not in api.payload:
             return {'status': 'failed', 'error': 'You have to provide name, streetname and buildingnumber'}
-
-        # if api.payload['buildingnumber'] 
 
         database = db.Database()
         try:
