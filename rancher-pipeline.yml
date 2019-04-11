@@ -1,0 +1,11 @@
+﻿stages:
+- name: build
+  steps:
+  - publishImageConfig:
+      dockerfilePath: ./Dockerfile
+      buildContext: .
+      tag: projectdevices/api
+      pushRemote: true
+      registry: index.docker.io
+timeout: 60
+notification: {}
