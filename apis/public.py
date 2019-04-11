@@ -84,7 +84,7 @@ class Buildings(Resource):
         for floor in floors:
             floordict = dict()
             floordict['id'] = floor[0]
-            floordict['floornumber'] = floor[1]
+            floordict['floornumber'] = int(floor[1])
             floordict['classrooms'] = []
 
             for building in totalObject:

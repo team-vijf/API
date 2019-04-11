@@ -11,7 +11,7 @@ newFloor = api.model('New Floor', {'building_id': fields.String('UUID of the bui
 newClassroom = api.model('New Classroom', {'classcode': fields.String('The classcode of the classroom.'), 'floor_id': fields.String('UUID of the floor this classroom belongs to.')})
 setLocation = api.model('Set Location', {'location': fields.String('Classcode of the location of the sensor device.')})
 
-sensor_fields = api.model('Sensor Values', {'sensor': fields.String('Name of the sensor'), 'value': fields.String('Value of the sensor')})
+sensor_fields = api.model('Sensor Values', {'sensor_name': fields.String('Name of the sensor'), 'value': fields.String('Value of the sensor')})
 sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nested(sensor_fields))})
 
 def token_required(f):
@@ -40,7 +40,7 @@ def token_required(f):
 
     return decorated
 
-@api.route('/private/sensor_values')
+@api.route('/sensor_values')
 class sensorValues(Resource):
 
     @api.doc(security='Token')
