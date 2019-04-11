@@ -2,6 +2,7 @@ from flask_restplus import Namespace, Resource, fields
 from core import db
 from functools import wraps
 from flask import request
+from core import api_vars
 
 api = Namespace('Public', description='The public side of the Lokaalbezetting API')
 
@@ -113,9 +114,9 @@ class Buildings(Resource):
 
             try:
                 freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classroomdict['classcode']))
-                if freeQuery[0][0] >= 3:
+                if freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
                     free = False
-                elif freeQuery[0][0] < 3:
+                elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD):
                     free = True
             except:
                 free = "Unknown"
@@ -187,9 +188,9 @@ class Building(Resource):
 
             try:
                 freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classroomdict['classcode']))
-                if freeQuery[0][0] >= 3:
+                if freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
                     free = False
-                elif freeQuery[0][0] < 3:
+                elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD):
                     free = True
             except:
                 free = "Unknown"
@@ -231,9 +232,9 @@ class Classroom(Resource):
 
         try:
             freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classcode))
-            if freeQuery[0][0] >= 3:
+            if freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
                 free = False
-            elif freeQuery[0][0] < 3:
+            elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD):
                 free = True
         except:
             free = "Unknown"
