@@ -11,7 +11,8 @@ newFloor = api.model('New Floor', {'building_id': fields.String('UUID of the bui
 newClassroom = api.model('New Classroom', {'classcode': fields.String('The classcode of the classroom.'), 'floor_id': fields.String('UUID of the floor this classroom belongs to.')})
 setLocation = api.model('Set Location', {'location': fields.String('Classcode of the location of the sensor device.')})
 
-sensor_values = api.model('Sensor Values', {'sensors': fields.List(fields.Nested("sensor": fields.String("Name of the sensor"), "value": fields.String("Value of the sensor")))})
+sensor_fields = api.model('Sensor Values', {'sensor': fields.String('Name of the sensor'), 'value': fields.String('Value of the sensor')})
+sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nested(sensor_fields))})
 
 def token_required(f):
     @wraps(f)
@@ -46,10 +47,10 @@ class sensorValues(Resource):
     @token_required
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
-    @api.expect(sensor_values)
+    @api.expect(sensor_list)
     def post(self):
 
-        if 'sensor_values' not in api.payload:
+        if 'sensors' not in api.payload:
             return {'status': 'failed', 'error': 'No sensor_values provided.'}
 
         # Check who it is
@@ -61,11 +62,51 @@ class sensorValues(Resource):
 
         # Check if location was set
         locationQuery = database.query('''SELECT location FROM configs WHERE uid = '{}';'''.format(uid))
-        if locationQuery[0][0] == None:
+        location = locationQuery[0][0]
+
+        if location == None:
             return {'status': 'failed', 'error': 'Device location was not set.'}
 
-        print(type(api.payload['sensor_values']))
+        sensors = api.payload['sensors']
 
+        sensor_amount = len(api.payload['sensors'])
+        sensor_count = 0
+
+        for sensor in sensors:
+            sensor_count =+ int(sensor['value'])
+
+        sensor_value = int(sensor_count) / int(sensor_amount)
+
+        try:
+            wasFreeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(location))
+            wasFree =  wasFreeQuery[0][0]
+            empty = False
+        except:
+            empty = True
+
+        # If there is someone present
+        if sensor_value > 50:
+            
+            if empty == False:
+
+                print('WasFree {}'.format(wasFree))
+                if wasFree == True:
+                    database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', false, Now() ) ;'''.format(location))
+            if empty == True:
+                database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', false, Now() ) ;'''.format(location))
+
+            return {'status': 'ok'}
+
+        elif sensor_value < 50:
+
+            # If there was noone
+            if empty == False:
+                if wasFree == False:
+                    database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', true, Now() ) ;'''.format(location))
+            if empty == True:
+                database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', true, Now() ) ;'''.format(location))
+
+            return {'status': 'ok'}
 
 
 @api.route('/config')
