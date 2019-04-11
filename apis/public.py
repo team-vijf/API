@@ -195,7 +195,9 @@ class Building(Resource):
                     if floor['id'] == classroom[1]:
                         floor['classrooms'].append(classroomdict)
 
-        return {'status': 'ok', 'buildings': totalObject}
+        building = totalObject[0]
+
+        return {'status': 'ok', 'id': building['id'], 'name': building['name'], 'streetname': building['streetname'], 'buildingnumber': building['buildingnumber'], 'floors': building['floors']}
 
 @api.route('/occupation/classroom/<string:classcode>')
 class Classroom(Resource):
@@ -206,8 +208,6 @@ class Classroom(Resource):
     @api.response(401, 'Unauthorized')
 
     def get(self, classcode):
-
-        totalObject = []
 
         database = db.Database()
         
@@ -228,14 +228,8 @@ class Classroom(Resource):
             free = freeQuery[0][0]
         except:
             free = "Unknown"
-
-        classroomdict = dict()
-        classroomdict['classcode'] = classcode
-        classroomdict['free'] = free
-
-        totalObject.append(classroomdict)
         
-        return {'status': 'ok', 'classrooms': totalObject}
+        return {'status': 'ok', 'classcode': classcode, 'free': free}
 
 
         
