@@ -9,8 +9,10 @@ api = Namespace('Private', description='The private side of the Lokaalbezetting 
 newBuilding = api.model('New Building', {'name': fields.String('Name of the building, e.g. HL15'), 'streetname': fields.String('Streetname, e.g. Heidelberglaan'), 'buildingnumber': fields.Integer('Building number, e.g. 15')})
 newFloor = api.model('New Floor', {'building_id': fields.String('UUID of the building this floor belongs to.'), 'floor_number': fields.String('Floor number')})
 newClassroom = api.model('New Classroom', {'classcode': fields.String('The classcode of the classroom.'), 'floor_id': fields.String('UUID of the floor this classroom belongs to.')})
-
 setLocation = api.model('Set Location', {'location': fields.String('Classcode of the location of the sensor device.')})
+
+sensor_values = api.model('Sensor Values', {'sensor': fields.String('Name of the sensor'), 'value': fields.String('Value of the sensor')})
+sensor_values_list = api.model('Sensor Values Content', fields.Nested(sensor_values))
 
 
 def token_required(f):
@@ -38,6 +40,33 @@ def token_required(f):
         return f(*args, **kwargs)
 
     return decorated
+
+@api.route('/private/sensor_values')
+class sensorValues(Resource):
+
+    @api.doc(security='Token')
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(sensor_values_list)
+    def post(self):
+
+        if 'sensor_values' not in api.payload:
+            return {'status': 'failed', 'error': 'No sensor_values provided.'}
+
+        # Check who it is
+        token = request.headers['X-API-KEY']
+
+        database = db.Database()
+        uidQuery = database.query('''SELECT uid FROM tokens WHERE token = '{}';'''.format(token))
+        uid = uidQuery[0][0]
+
+        # Check if location was set
+        locationQuery = database.query('''SELECT location FROM configs WHERE uid = '{}';'''.format(uid))
+        if locationQuery[0][0] == None:
+            return {'status': 'failed', 'error': 'Device location was not set.'}
+
+        print(type(api.payload['sensor_values']))
 
 
 
