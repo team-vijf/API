@@ -11,9 +11,7 @@ newFloor = api.model('New Floor', {'building_id': fields.String('UUID of the bui
 newClassroom = api.model('New Classroom', {'classcode': fields.String('The classcode of the classroom.'), 'floor_id': fields.String('UUID of the floor this classroom belongs to.')})
 setLocation = api.model('Set Location', {'location': fields.String('Classcode of the location of the sensor device.')})
 
-sensor_values = api.model('Sensor Values', {'sensor': fields.String('Name of the sensor'), 'value': fields.String('Value of the sensor')})
-sensor_values_list = api.model('Sensor Values Content', fields.Nested(sensor_values))
-
+sensor_values = api.model('Sensor Values', {'sensors': fields.List(fields.Nested("sensor": fields.String("Name of the sensor"), "value": fields.String("Value of the sensor")))})
 
 def token_required(f):
     @wraps(f)
@@ -48,7 +46,7 @@ class sensorValues(Resource):
     @token_required
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
-    @api.expect(sensor_values_list)
+    @api.expect(sensor_values)
     def post(self):
 
         if 'sensor_values' not in api.payload:
