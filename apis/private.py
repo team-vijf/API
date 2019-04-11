@@ -9,9 +9,10 @@ api = Namespace('Private', description='The private side of the Lokaalbezetting 
 newBuilding = api.model('New Building', {'name': fields.String('Name of the building, e.g. HL15'), 'streetname': fields.String('Streetname, e.g. Heidelberglaan'), 'buildingnumber': fields.Integer('Building number, e.g. 15')})
 newFloor = api.model('New Floor', {'building_id': fields.String('UUID of the building this floor belongs to.'), 'floor_number': fields.String('Floor number')})
 newClassroom = api.model('New Classroom', {'classcode': fields.String('The classcode of the classroom.'), 'floor_id': fields.String('UUID of the floor this classroom belongs to.')})
-
 setLocation = api.model('Set Location', {'location': fields.String('Classcode of the location of the sensor device.')})
 
+sensor_fields = api.model('Sensor Values', {'sensor': fields.String('Name of the sensor'), 'value': fields.String('Value of the sensor')})
+sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nested(sensor_fields))})
 
 def token_required(f):
     @wraps(f)
@@ -39,6 +40,73 @@ def token_required(f):
 
     return decorated
 
+@api.route('/private/sensor_values')
+class sensorValues(Resource):
+
+    @api.doc(security='Token')
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(sensor_list)
+    def post(self):
+
+        if 'sensors' not in api.payload:
+            return {'status': 'failed', 'error': 'No sensor_values provided.'}
+
+        # Check who it is
+        token = request.headers['X-API-KEY']
+
+        database = db.Database()
+        uidQuery = database.query('''SELECT uid FROM tokens WHERE token = '{}';'''.format(token))
+        uid = uidQuery[0][0]
+
+        # Check if location was set
+        locationQuery = database.query('''SELECT location FROM configs WHERE uid = '{}';'''.format(uid))
+        location = locationQuery[0][0]
+
+        if location == None:
+            return {'status': 'failed', 'error': 'Device location was not set.'}
+
+        sensors = api.payload['sensors']
+
+        sensor_amount = len(api.payload['sensors'])
+        sensor_count = 0
+
+        for sensor in sensors:
+            sensor_count =+ int(sensor['value'])
+
+        sensor_value = int(sensor_count) / int(sensor_amount)
+
+        try:
+            wasFreeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(location))
+            wasFree =  wasFreeQuery[0][0]
+            empty = False
+        except:
+            empty = True
+
+        # If there is someone present
+        if sensor_value > 50:
+            
+            if empty == False:
+
+                print('WasFree {}'.format(wasFree))
+                if wasFree == True:
+                    database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', false, Now() ) ;'''.format(location))
+            if empty == True:
+                database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', false, Now() ) ;'''.format(location))
+
+            return {'status': 'ok'}
+
+        elif sensor_value < 50:
+
+            # If there was noone
+            if empty == False:
+                if wasFree == False:
+                    database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', true, Now() ) ;'''.format(location))
+            if empty == True:
+                database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', true, Now() ) ;'''.format(location))
+
+            return {'status': 'ok'}
 
 
 @api.route('/config')
