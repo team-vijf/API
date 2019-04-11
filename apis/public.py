@@ -44,7 +44,10 @@ class Classrooms(Resource):
         classroomsQuery = database.query('''SELECT classcode FROM classrooms;''')
 
         if classroomsQuery == False:
-            return {'status': 'failed', 'error': 'Could not get classrooms from database'}
+            return {'status': 'failed', 'error': 'Could not get classrooms from database.'}
+
+        if len(classroomsQuery) < 1:
+            return {'status': 'failed', 'error': 'There are no classrooms.'}
 
         for classroom in classroomsQuery:
             classroomdict = dict()
