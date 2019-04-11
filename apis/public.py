@@ -70,6 +70,12 @@ class Buildings(Resource):
         database = db.Database()
         buildings = database.query('''SELECT * FROM buildings ORDER BY name;''')
 
+        if buildings == False:
+            return {'status': 'failed', 'error': 'Could not get buildings from database'}
+
+        if len(buildings) < 1:
+            return {'status': 'failed', 'error': 'There are no buildings.'}
+
         for building in buildings:
             buildingdict = dict()
             buildingdict['id'] = building[0]
@@ -80,6 +86,9 @@ class Buildings(Resource):
             totalObject.append(buildingdict)
 
         floors = database.query('''SELECT * FROM floors ORDER BY floornumber;''')
+
+        if floors == False:
+            return {'status': 'failed', 'error': 'Could not get floors from database'}
 
         for floor in floors:
             floordict = dict()
@@ -92,6 +101,9 @@ class Buildings(Resource):
                     building['floors'].append(floordict)
 
         classrooms = database.query('''SELECT * FROM classrooms;''')
+
+        if classrooms == False:
+            return {'status': 'failed', 'error': 'Could not get classrooms from database'}
 
         for classroom in classrooms:
             classroomdict = dict()
@@ -113,3 +125,117 @@ class Buildings(Resource):
                         floor['classrooms'].append(classroomdict)
 
         return {'status': 'ok', 'buildings': totalObject}
+
+@api.route('/occupation/building/<string:building_id>')
+class Building(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+
+    def get(self, building_id):
+
+        totalObject = []
+        
+        database = db.Database()
+        buildings = database.query('''SELECT * FROM buildings WHERE id = '{}' ORDER BY name;'''.format(building_id))
+
+        if buildings == False:
+            return {'status': 'failed', 'error': '{} is not a valid UUID.'.format(building_id)}
+
+        if len(buildings) < 1:
+            return {'status': 'failed', 'error': 'Building with id {} does not exist.'.format(building_id)}
+
+        for building in buildings:
+            buildingdict = dict()
+            buildingdict['id'] = building[0]
+            buildingdict['name'] = building[1]
+            buildingdict['streetname'] = building[2]
+            buildingdict['buildingnumber'] = building[3]
+            buildingdict['floors'] = []
+            totalObject.append(buildingdict)
+
+        floors = database.query('''SELECT * FROM floors ORDER BY floornumber;''')
+
+        if floors == False:
+            return {'status': 'failed', 'error': 'Could not get floors from database'}
+
+        for floor in floors:
+            floordict = dict()
+            floordict['id'] = floor[0]
+            floordict['floornumber'] = int(floor[1])
+            floordict['classrooms'] = []
+
+            for building in totalObject:
+                if building['id'] == floor[2]:
+                    building['floors'].append(floordict)
+
+        classrooms = database.query('''SELECT * FROM classrooms;''')
+
+        if classrooms == False:
+            return {'status': 'failed', 'error': 'Could not get classrooms from database'}
+
+        for classroom in classrooms:
+            classroomdict = dict()
+            classroomdict['classcode'] = classroom[0]
+
+            free = "Unknown"
+
+            try:
+                freeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(classroom[0]))
+                free = freeQuery[0][0]
+            except:
+                free = "Unknown"
+
+            classroomdict['free'] = free
+
+            for buildings in totalObject:
+                for floor in buildings['floors']:
+                    if floor['id'] == classroom[1]:
+                        floor['classrooms'].append(classroomdict)
+
+        return {'status': 'ok', 'buildings': totalObject}
+
+@api.route('/occupation/classroom/<string:classcode>')
+class Classroom(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+
+    def get(self, classcode):
+
+        totalObject = []
+
+        database = db.Database()
+        
+        classrooms = database.query('''SELECT * FROM classrooms WHERE classcode = '{}';'''.format(classcode))
+
+        if classrooms == False:
+            return {'status': 'failed', 'error': 'Could not get classrooms from database'}
+
+        if len(classrooms) < 1:
+            return {'status': 'failed', 'error': 'Classroom with classcode {} does not exist'.format(classcode)}
+
+        classcode = classrooms[0][0]
+
+        free = "Unknown"
+
+        try:
+            freeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(classcode))
+            free = freeQuery[0][0]
+        except:
+            free = "Unknown"
+
+        classroomdict = dict()
+        classroomdict['classcode'] = classcode
+        classroomdict['free'] = free
+
+        totalObject.append(classroomdict)
+        
+        return {'status': 'ok', 'classrooms': totalObject}
+
+
+        
