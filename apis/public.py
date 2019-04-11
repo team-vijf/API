@@ -79,9 +79,37 @@ class Buildings(Resource):
             buildingdict['floors'] = []
             totalObject.append(buildingdict)
 
-        joined = database.query('''SELECT b.id, b.name, b.streetname, b.buildingnumber, f.id, f.floornumber, c.classcode
-                                   FROM buildings as b
-                                   INNER JOIN floors as f ON f.id_buildings = b.id
-                                   INNER JOIN classrooms as c ON c.id_floors = f.id;''')
+        floors = database.query('''SELECT * FROM floors ORDER BY floornumber;''')
+
+        for floor in floors:
+            floordict = dict()
+            floordict['id'] = floor[0]
+            floordict['floornumber'] = floor[1]
+            floordict['classrooms'] = []
+
+            for building in totalObject:
+                if building['id'] == floor[2]:
+                    building['floors'].append(floordict)
+
+        classrooms = database.query('''SELECT * FROM classrooms;''')
+
+        for classroom in classrooms:
+            classroomdict = dict()
+            classroomdict['classcode'] = classroom[0]
+
+            free = "Unknown"
+
+            try:
+                freeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(classroom[0]))
+                free = freeQuery[0][0]
+            except:
+                free = "Unknown"
+
+            classroomdict['free'] = free
+
+            for buildings in totalObject:
+                for floor in buildings['floors']:
+                    if floor['id'] == classroom[1]:
+                        floor['classrooms'].append(classroomdict)
 
         return {'status': 'ok', 'buildings': totalObject}
