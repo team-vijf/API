@@ -112,8 +112,11 @@ class Buildings(Resource):
             free = "Unknown"
 
             try:
-                freeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(classroom[0]))
-                free = freeQuery[0][0]
+                freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classroomdict['classcode']))
+                if freeQuery[0][0] >= 3:
+                    free = False
+                elif freeQuery[0][0] < 3:
+                    free = True
             except:
                 free = "Unknown"
 
@@ -183,8 +186,11 @@ class Building(Resource):
             free = "Unknown"
 
             try:
-                freeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(classroom[0]))
-                free = freeQuery[0][0]
+                freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classroomdict['classcode']))
+                if freeQuery[0][0] >= 3:
+                    free = False
+                elif freeQuery[0][0] < 3:
+                    free = True
             except:
                 free = "Unknown"
 
@@ -224,8 +230,11 @@ class Classroom(Resource):
         free = "Unknown"
 
         try:
-            freeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(classcode))
-            free = freeQuery[0][0]
+            freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classcode))
+            if freeQuery[0][0] >= 3:
+                free = False
+            elif freeQuery[0][0] < 3:
+                free = True
         except:
             free = "Unknown"
         

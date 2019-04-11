@@ -69,42 +69,17 @@ class sensorValues(Resource):
 
         sensors = api.payload['sensors']
 
-        sensor_amount = len(api.payload['sensors'])
-        sensor_count = 0
+        motion_value = int(sensors[0]['value'])
 
-        for sensor in sensors:
-            sensor_count =+ int(sensor['value'])
+        if motion_value == 100:
 
-        sensor_value = int(sensor_count) / int(sensor_amount)
+            addValue = database.query('''INSERT INTO occupation ( classcode, free, time ) VALUES ( '{}', true, Now() ) ;'''.format(location))
+            if addValue == False:
+                return {'status': 'failed', 'error': 'Could not insert sensor value in database.'}
 
-        try:
-            wasFreeQuery = database.query('''SELECT free FROM occupation WHERE classcode = '{}' ORDER BY time DESC LIMIT 1;'''.format(location))
-            wasFree =  wasFreeQuery[0][0]
-            empty = False
-        except:
-            empty = True
+            # test = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(location))
 
-        # If there is someone present
-        if sensor_value > 50:
-            
-            if empty == False:
-
-                print('WasFree {}'.format(wasFree))
-                if wasFree == True:
-                    database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', false, Now() ) ;'''.format(location))
-            if empty == True:
-                database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', false, Now() ) ;'''.format(location))
-
-            return {'status': 'ok'}
-
-        elif sensor_value < 50:
-
-            # If there was noone
-            if empty == False:
-                if wasFree == False:
-                    database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', true, Now() ) ;'''.format(location))
-            if empty == True:
-                database.query('''INSERT INTO occupation ( classcode, free, time ) values ( '{}', true, Now() ) ;'''.format(location))
+            # print(test[0][0])
 
             return {'status': 'ok'}
 

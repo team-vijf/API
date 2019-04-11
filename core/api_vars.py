@@ -10,4 +10,6 @@ DB_USER = os.getenv('DB_USER', 'postgres')
 DB_PASSWORD = os.getenv('DB_PASSWORD', 'password')
 DB_NAME = os.getenv('DB_NAME', 'project')
 
-SHARED_SECRET = 'secret'
+SHARED_SECRET = os.getenv('SHARED_SECRET', 'secret')
+
+MOTION_THRESHOLD = os.getenv('MOTION_THRESHOLD', '3')
