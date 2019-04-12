@@ -26,7 +26,7 @@ ALTER TABLE floors OWNER TO postgres;
 -- object: classrooms | type: TABLE --
 -- DROP TABLE IF EXISTS classrooms CASCADE;
 CREATE TABLE IF NOT EXISTS classrooms(
-	classcode varchar(10) NOT NULL,
+	classcode varchar(25) NOT NULL,
 	id_floors uuid NOT NULL,
 	CONSTRAINT classrooms_pk PRIMARY KEY (classcode)
 );
@@ -35,7 +35,7 @@ ALTER TABLE classrooms OWNER TO postgres;
 -- ddl-end --
 
 CREATE TABLE IF NOT EXISTS occupation(
-	classcode varchar(10) NOT NULL,
+	classcode varchar(25) NOT NULL,
 	time TIMESTAMP NOT NULL,
 	free boolean NOT NULL
 );
