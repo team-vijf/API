@@ -115,11 +115,10 @@ class Buildings(Resource):
             try:
                 freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classroomdict['classcode']))
                 
-                if freeQuery[0][0] == 0:
-                    free = "Unknown"
-                elif freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
+
+                if freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
                     free = False
-                elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD) and freeQuery[0][0] > 0:
+                elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD):
                     free = True
             except:
                 free = "Unknown"
@@ -191,11 +190,9 @@ class Building(Resource):
 
             try:
                 freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classroomdict['classcode']))
-                if freeQuery[0][0] == 0:
-                    free = "Unknown"
-                elif freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
+                if freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
                     free = False
-                elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD) and freeQuery[0][0] > 0:
+                elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD):
                     free = True
             except:
                 free = "Unknown"
@@ -237,11 +234,9 @@ class Classroom(Resource):
 
         try:
             freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classcode))
-            if freeQuery[0][0] == 0:
-                free = "Unknown"
-            elif freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
+            if freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
                 free = False
-            elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD) and freeQuery[0][0] > 0:
+            elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD):
                 free = True
         except:
             free = "Unknown"
