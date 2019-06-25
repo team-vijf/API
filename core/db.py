@@ -56,6 +56,18 @@ class Database():
             sys.stderr.write('Database Error: {}'.format(err))
             return False
 
+    def addFloorplan(self, floorPlan, floorId):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            cur.execute('''INSERT INTO floorplans ( floorplan, id_floors) VALUES ( '{}', '{}' );'''.format(floorPlan, floorId))
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
+
     def query(self, query):
 
         try:

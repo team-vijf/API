@@ -34,6 +34,17 @@ CREATE TABLE IF NOT EXISTS classrooms(
 ALTER TABLE classrooms OWNER TO postgres;
 -- ddl-end --
 
+CREATE TABLE IF NOT EXISTS floorplans(
+	floorplan xml NOT NULL,
+	id_floors uuid NOT NULL,
+	CONSTRAINT floorplan_pk PRIMARY KEY (id_floors)
+);
+
+-- ddl-end --
+ALTER TABLE floorplans OWNER TO postgres;
+-- ddl-end --
+
+
 CREATE TABLE IF NOT EXISTS occupation(
 	classcode varchar(25) NOT NULL,
 	time TIMESTAMP NOT NULL,

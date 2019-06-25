@@ -242,3 +242,52 @@ class newClassroom(Resource):
         created = {'classcode': result[0][0], 'floor_id': result[0][1]}
 
         return {'status': 'ok', 'created': created}
+
+@api.route('/floorplan/<string:floor_id>')
+class Floorplan(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    
+
+    def get(self, floor_id):
+        
+        database = db.Database()
+
+        try:
+            result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
+            if len(result) < 1:
+                return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(floor_id))}
+        except:
+            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id))}
+
+        return {'status': 'ok', 'floorplan': str(result)}
+
+@api.route('/floorplan/new')
+class Floorplan(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(newClassroom)
+    
+    def post(self, floor_id):
+
+        database = db.Database()
+
+        try:
+            result = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
+            if len(result) < 1:
+                return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id))}
+        except:
+            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id))}
+
+        database.addFloorplan(classCode=api.payload['classcode'], floorId=api.payload['floor_id'])
+
+        result = database.query('''SELECT * FROM classrooms WHERE classcode = '{}' AND id_floors = '{}';'''.format(api.payload['classcode'], api.payload['floor_id']))
+        created = {'classcode': result[0][0], 'floor_id': result[0][1]}
+
+        return {'status': 'ok', 'created': created}
