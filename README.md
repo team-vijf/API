@@ -3,40 +3,40 @@ REST API for writing/reading data from TimescaleDB
 
 
 
-## Dependencies
-The easiest way to try it out is to pull a TimescaleDB container with the following command:
+## Installing locally
+The best way to run this locally is to first clone this repo and then to build the container using the provided dockerfile (use the -t flag to tag the container with 'api')
+Then start up the container and timescaledb with the following docker-compose file:
 ```
-docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRES_DB=project timescale/timescaledb:latest-pg11
+version: '3'
+
+services:
+  api:
+    image: api
+    container_name: api
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - API_PORT=80
+      - API_IP=0.0.0.0
+      - API_DEBUG=True
+      - DB_IP=127.0.0.1
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=project
+      - SHARED_SECRET=secret
+      - MOTION_THRESHOLD=3
+
+  db:
+    image: timescale/timescaledb:latest-pg11
+    container_name: timescaledb
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - POSTGRES_DB=project
+      - POSTGRES_PASSWORD=password
 ```
-Then set the appropriate IP, port etc. in core/api_vars. These values can also be set by environment variables.
 
-### Environment Variables
-The following environment variables can be set:
-#### API_PORT
-This setting will adjust the port the API is listening for requests.
-Default is '80'
-#### API_IP
-This setting will bind the API's listener to a specific IP
-Default is '0.0.0.0' (Bind to all)
-#### API_DEBUG
-If this setting is true, Flask will output more logs in stdout and stderr.
-Default is 'True'
-
-#### DB_IP
-This setting will define where to look for the TimescaleDB database.
-Default is '192.168.135.134' (Will change to localhost once development is over)
-#### DB_PORT
-This setting will define on what port the database is listening for requests
-Default is '5432'
-#### DB_USER
-This setting will define what user will be used to log in on the database.
-Default is 'postgres'
-#### DB_PASSWORD
-This setting will define what password will be used for DB_USER to log in on the database.
-Default is 'password'
-#### DB_NAME
-This setting will define what database will be used.
-Default is 'project'
 
 ## SwaggerUI
 Once the API has launched you can visit the Swagger Documentation at the root (E.g. http://localhost/).

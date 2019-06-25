@@ -208,6 +208,7 @@ class Building(Resource):
 
         return {'status': 'ok', 'id': building['id'], 'name': building['name'], 'streetname': building['streetname'], 'buildingnumber': building['buildingnumber'], 'floors': building['floors']}
 
+
 @api.route('/occupation/classroom/<string:classcode>')
 class Classroom(Resource):
 
