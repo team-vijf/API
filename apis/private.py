@@ -283,9 +283,9 @@ class Floorplan(Resource):
         try:
             result = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
             if len(result) < 1:
-                return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id))}
+                return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
         except:
-            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id))}
+            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
 
         database.addFloorplan(classCode=api.payload['classcode'], floorId=api.payload['floor_id'])
 
