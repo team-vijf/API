@@ -276,7 +276,7 @@ class Floorplan(Resource):
     @api.response(401, 'Unauthorized')
     @api.expect(newFloorplan)
     
-    def post(self, floor_id):
+    def post(self, floor_id, floorplan):
 
         database = db.Database()
 
@@ -287,7 +287,7 @@ class Floorplan(Resource):
         except:
             return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
 
-        database.addFloorplan(classCode=api.payload['classcode'], floorId=api.payload['floor_id'])
+        database.addFloorplan(Floorplan=floorplan, floorId=floor_id)
 
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
         created = {'floorplan': result[0][0], 'floor_id': result[0][1]}
