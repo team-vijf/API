@@ -293,12 +293,12 @@ class Floorplan(Resource):
         try:
             result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
             if len(result) > 0:
-                return {'status': 'failed', 'error': 'There is already a floorplan for floor with UUID {}.'.format(floor_id)}
+                return {'status': 'failed', 'error': 'There is already a floorplan for floor with UUID {}.'.format(api.payload['floor_id'])}
         except:
-            return {'status': 'failed', 'error': 'There is already a floorplan for floor with UUID {}.'.format(floor_id)}
+            return {'status': 'failed', 'error': 'There is already a floorplan for floor with UUID {}.'.format(api.payload['floor_id'])}
 
         database.addFloorplan(floorPlan=api.payload['floorplan'].replace("'", "''"), floorId=api.payload['floor_id'])
-2
+
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
 
         return {'status': 'ok', 'floorplan': result[0]}
