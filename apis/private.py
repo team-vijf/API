@@ -245,28 +245,6 @@ class newClassroom(Resource):
 
         return {'status': 'ok', 'created': created}
 
-@api.route('/floorplan/<string:floor_id>')
-class Floorplan(Resource):
-
-    @api.doc(security=['Token'])
-    @token_required
-    @api.response(200, 'Success')
-    @api.response(401, 'Unauthorized')
-    
-
-    def get(self, floor_id):
-        
-        database = db.Database()
-
-        try:
-            result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
-            if len(result) < 1:
-                return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(floor_id)}
-        except:
-            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
-
-        return {'status': 'ok', 'floorplan': str(result[0][0])}
-
 @api.route('/floorplan/new')
 class Floorplan(Resource):
 
