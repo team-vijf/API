@@ -62,7 +62,7 @@ class Database():
             self.connect()
             cur = self.connection.cursor()
 
-            cur.execute('''INSERT INTO floorplans ( floorplan, id_floors) VALUES ( XMLPARSE('{}'), '{}' );'''.format(floorPlan, floorId))
+            cur.execute('''INSERT INTO floorplans ( floorplan, id_floors) VALUES ( '{}', '{}' );'''.format(floorPlan, floorId))
 
         except Exception as err:
             sys.stderr.write('Database Error: {}'.format(err))

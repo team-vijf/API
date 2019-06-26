@@ -290,7 +290,7 @@ class Floorplan(Resource):
         except:
             return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(api.payload['floor_id'])}
 
-        database.addFloorplan(floorPlan=api.payload['floorplan'], floorId=api.payload['floor_id'])
+        database.addFloorplan(floorPlan=api.payload['floorplan'].replace("'", "''"), floorId=api.payload['floor_id'])
 
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
         print(result)
