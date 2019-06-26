@@ -261,7 +261,7 @@ class Floorplan(Resource):
         try:
             result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
             if len(result) < 1:
-                return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(floor_id))}
+                return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(floor_id)}
         except:
             return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id))}
 
