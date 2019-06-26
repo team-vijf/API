@@ -292,6 +292,7 @@ class Floorplan(Resource):
 
         try:
             result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
+            print(result)
             if len(result) > 0:
                 return {'status': 'failed', 'error': 'There is already a floorplan for floor with UUID {}.'.format(api.payload['floor_id'])}
         except:
