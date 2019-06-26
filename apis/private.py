@@ -276,20 +276,23 @@ class Floorplan(Resource):
     @api.response(401, 'Unauthorized')
     @api.expect(newFloorplan)
     
-    def post(self, floor_id, floorplan):
+    def post(self):
+
+        if 'floorplan' not in api.payload or 'floor_id' not in api.payload:
+            return {'status': 'failed', 'error': 'You have to provide floor_id and the floorplan'}
 
         database = db.Database()
 
         try:
-            result = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
+            result = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(api.payload['floor_id']))
             if len(result) < 1:
-                return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
+                return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(api.payload['floor_id'])}
         except:
-            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
+            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(api.payload['floor_id'])}
 
-        database.addFloorplan(Floorplan=floorplan, floorId=floor_id)
+        database.addFloorplan(Floorplan=api.payload['floorplan'], floorId=api.payload['floor_id'])
 
-        result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
+        result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
         created = {'floorplan': result[0][0], 'floor_id': result[0][1]}
 
         return {'status': 'ok', 'created': created}
