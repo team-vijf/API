@@ -265,7 +265,7 @@ class Floorplan(Resource):
         except:
             return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
 
-        return {'status': 'ok', 'floorplan': str(result)}
+        return {'status': 'ok', 'floorplan': str(result[0][0])}
 
 @api.route('/floorplan/new')
 class Floorplan(Resource):
@@ -301,4 +301,4 @@ class Floorplan(Resource):
 
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
 
-        return {'status': 'ok', 'floorplan': result[0]}
+        return {'status': 'ok', 'floorplan': result[0][0]}
