@@ -14,6 +14,8 @@ setLocation = api.model('Set Location', {'location': fields.String('Classcode of
 sensor_fields = api.model('Sensor Values', {'sensor_name': fields.String('Name of the sensor'), 'value': fields.String('Value of the sensor')})
 sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nested(sensor_fields))})
 
+newFloorplan = api.model('New Floorplan', {'floor_id': fields.String('UUID of the floor this floorplan belongs to.'), 'floorplan': fields.String('Floorplan in XML form')})
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -272,7 +274,7 @@ class Floorplan(Resource):
     @token_required
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
-    @api.expect(newClassroom)
+    @api.expect(newFloorplan)
     
     def post(self, floor_id):
 
@@ -287,7 +289,7 @@ class Floorplan(Resource):
 
         database.addFloorplan(classCode=api.payload['classcode'], floorId=api.payload['floor_id'])
 
-        result = database.query('''SELECT * FROM classrooms WHERE classcode = '{}' AND id_floors = '{}';'''.format(api.payload['classcode'], api.payload['floor_id']))
-        created = {'classcode': result[0][0], 'floor_id': result[0][1]}
+        result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(floor_id))
+        created = {'floorplan': result[0][0], 'floor_id': result[0][1]}
 
         return {'status': 'ok', 'created': created}
