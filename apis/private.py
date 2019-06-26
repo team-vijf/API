@@ -293,6 +293,6 @@ class Floorplan(Resource):
         database.addFloorplan(floorPlan=api.payload['floorplan'], floorId=api.payload['floor_id'])
 
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
-        created = {'floorplan': result[0][0], 'floor_id': result[0][1]}
+        print(result)
 
-        return {'status': 'ok', 'created': created}
+        return {'status': 'ok'}
