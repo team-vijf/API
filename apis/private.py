@@ -263,7 +263,7 @@ class Floorplan(Resource):
             if len(result) < 1:
                 return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(floor_id)}
         except:
-            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id))}
+            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
 
         return {'status': 'ok', 'floorplan': str(result)}
 
