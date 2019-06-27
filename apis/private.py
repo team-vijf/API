@@ -4,6 +4,7 @@ from functools import wraps
 from flask import request
 import sys
 import requests
+import json
 
 api = Namespace('Private', description='The private side of the Lokaalbezetting API')
 
