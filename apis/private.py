@@ -301,7 +301,7 @@ class SampleBuilding(Resource):
 
             auth_header = {'X-API-KEY': r_reply['token']} 
 
-            building = {'name': 'HL18', 'streetname': 'Heidelberglaan', 'buildingnumber': 15}
+            building = {'name': 'HL15', 'streetname': 'Heidelberglaan', 'buildingnumber': 15}
             r = requests.post('{}/private/buildings/new'.format(url), json=building, headers=auth_header)
             r_reply = json.loads(r.text)
 
