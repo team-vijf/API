@@ -223,9 +223,8 @@ class Floor(Resource):
         
         floors = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
 
-        sys.stderr(str(floors))
         print(floors)
-        sys.stdout(str(floors))
+        sys.stdout.write(str(floors))
 
         if floors == False:
             return {'status': 'failed', 'error': 'Could not get floors from database'}
