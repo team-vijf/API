@@ -31,6 +31,9 @@ def generate_sample_data():
             break
         classrooms = database.query('''SELECT classcode FROM classrooms;''')
         for classroom in classrooms:
+            global stop
+            if stop:
+                break
             free = random.choice([0,1])
             if free == 0:
 
@@ -384,6 +387,8 @@ class SampleData(Resource):
     def get(self):
         global x
         global stop
+        if stop = False
+            return {'status': 'ok', 'message': 'Sample data generation was already started'}
         stop = False
         x = threading.Thread(target=generate_sample_data)
         x.start()
@@ -399,6 +404,8 @@ class SampleData(Resource):
     def get(self):
         global x
         global stop
+        if stop = True
+            return {'status': 'ok', 'message': 'Sample data generation was already stopped'}
         stop = True
         x.join()
         return {'status': 'ok', 'message': 'Sample data generation stopped'}
