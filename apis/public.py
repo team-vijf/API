@@ -208,6 +208,60 @@ class Building(Resource):
 
         return {'status': 'ok', 'id': building['id'], 'name': building['name'], 'streetname': building['streetname'], 'buildingnumber': building['buildingnumber'], 'floors': building['floors']}
 
+@api.route('/occupation/floor/<string:floor_id>')
+class Floor(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+
+    def get(self, floor_id):
+
+        database = db.Database()
+        
+        floors = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
+
+        if floors == False:
+            return {'status': 'failed', 'error': 'Could not get floors from database'}
+
+        if len(floors) < 1:
+            return {'status': 'failed', 'error': 'Floor with id {} does not exist'.format(floor_id)}
+
+        floor_id = floor[0]
+        floor_number = int(floor[1])
+        classrooms = []
+
+        classrooms = database.query('''SELECT * FROM classrooms WHERE id_floors = '{}';'''.format(floor_id))
+
+        if classrooms == False:
+            return {'status': 'failed', 'error': 'Could not get classrooms from database'}
+
+        if len(classrooms) < 1:
+            return {'status': 'failed', 'error': 'Floor with id {} has no classrooms'.format(floor_id)}
+
+        for classroom in classrooms:
+            classroomdict = dict()
+            classroomdict['classcode'] = classroom[0]
+
+            free = "Unknown"
+
+            try:
+                freeQuery = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(classroomdict['classcode']))
+                if freeQuery[0][0] >= int(api_vars.MOTION_THRESHOLD):
+                    free = False
+                elif freeQuery[0][0] < int(api_vars.MOTION_THRESHOLD):
+                    free = True
+            except:
+                free = "Unknown"
+
+            classroomdict['free'] = free
+
+            classrooms.append(classroomdict)
+
+        return {'status': 'ok', 'id': floor_id, 'classrooms': classrooms}
+
+
 
 @api.route('/occupation/classroom/<string:classcode>')
 class Classroom(Resource):
