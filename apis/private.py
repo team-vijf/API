@@ -26,6 +26,9 @@ def generate_sample_data():
     database = db.Database()
 
     while True:
+        global stop_threads 
+        if stop_threads: 
+            break
         classrooms = database.query('''SELECT classcode FROM classrooms;''')
         for classroom in classrooms:
             free = random.choice([0,1])
@@ -38,7 +41,7 @@ def generate_sample_data():
 
         time.sleep(19)
 
-x = threading.Thread(target=generate_sample_data, daemon=True)
+x = threading.Thread(target=generate_sample_data)
 
 def token_required(f):
     @wraps(f)
@@ -381,6 +384,7 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
+        stop_threads = False
         x.start()
         return {'status': 'ok', 'message': 'Sample data generation started'}
 
@@ -392,5 +396,6 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
-        x._stop()
+        stop_threads = True
+        x.join()
         return {'status': 'ok', 'message': 'Sample data generation stopped'}
