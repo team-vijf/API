@@ -228,8 +228,8 @@ class Floor(Resource):
         if len(floors) < 1:
             return {'status': 'failed', 'error': 'Floor with id {} does not exist'.format(floor_id)}
 
-        floor_id = floor[0]
-        floor_number = int(floor[1])
+        floor_id = floors[0]
+        floor_number = int(floors[1])
         classrooms = []
 
         classrooms = database.query('''SELECT * FROM classrooms WHERE id_floors = '{}';'''.format(floor_id))
