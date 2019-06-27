@@ -3,6 +3,7 @@ from core import db
 from functools import wraps
 from flask import request
 from core import api_vars
+import sys
 
 api = Namespace('Public', description='The public side of the Lokaalbezetting API')
 
@@ -222,10 +223,14 @@ class Floor(Resource):
         
         floors = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
 
+        sys.stderr(str(floors))
+        print(floors)
+        sys.stdout(str(floors))
+
         if floors == False:
             return {'status': 'failed', 'error': 'Could not get floors from database'}
 
-        if len(floors) < 1:
+        if len(floors[0]) < 1:
             return {'status': 'failed', 'error': 'Floor with id {} does not exist'.format(floor_id)}
 
         floor_id = floors[0][0]
