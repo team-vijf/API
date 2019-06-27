@@ -379,6 +379,7 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
+        global x
         x = threading.Thread(target=generate_sample_data)
         x.start()
         return {'status': 'ok', 'message': 'Sample data generation started'}
@@ -391,6 +392,7 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
+        global x
         x.raise_exception()
         x.join()
         return {'status': 'ok', 'message': 'Sample data generation stopped'}
