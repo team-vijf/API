@@ -21,7 +21,7 @@ sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nes
 
 newFloorplan = api.model('New Floorplan', {'floor_id': fields.String('UUID of the floor this floorplan belongs to.'), 'floorplan': fields.String('Floorplan in XML form')})
 
-stop = None
+stop = True
 
 def generate_sample_data():
 
