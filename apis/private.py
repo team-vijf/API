@@ -5,6 +5,9 @@ from flask import request
 import sys
 import requests
 import json
+import threading
+import time
+import random
 
 api = Namespace('Private', description='The private side of the Lokaalbezetting API')
 
@@ -17,6 +20,25 @@ sensor_fields = api.model('Sensor Values', {'sensor_name': fields.String('Name o
 sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nested(sensor_fields))})
 
 newFloorplan = api.model('New Floorplan', {'floor_id': fields.String('UUID of the floor this floorplan belongs to.'), 'floorplan': fields.String('Floorplan in XML form')})
+
+def generate_sample_data():
+
+    database = db.Database()
+
+    while True:
+        classrooms = database.query('''SELECT classcode FROM classrooms;''')
+        for classroom in classrooms:
+            free = random.choice([0,1])
+            if free == 0:
+
+                addValue = database.query('''INSERT INTO occupation ( classcode, free, time ) VALUES ( '{}', true, Now() ) ;'''.format(classroom[0]))
+
+            elif free == 1:
+                continue
+
+        time.sleep(19)
+
+x = threading.Thread(target=generate_sample_data, daemon=True)
 
 def token_required(f):
     @wraps(f)
@@ -350,3 +372,25 @@ class SampleBuilding(Resource):
 
         except Exception as err:
             return {'status': 'failed', 'error': str(err)}
+
+@api.route('/debug/sample_data_generator/start')
+class SampleData(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    def get(self):
+        x.start()
+        return {'status': 'ok', 'message': 'Sample data generation started'}
+
+@api.route('/debug/sample_data_generator/stop')
+class SampleData(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    def get(self):
+        x.stop()
+        return {'status': 'ok', 'message': 'Sample data generation stopped'}
