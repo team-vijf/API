@@ -222,8 +222,7 @@ class Floor(Resource):
         database = db.Database()
         
         floors = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
-
-        print(floors)
+        return {'floor': str(floors)}
 
         if floors == False:
             return {'status': 'failed', 'error': 'Could not get floors from database'}
@@ -236,8 +235,6 @@ class Floor(Resource):
         classrooms = []
 
         classrooms = database.query('''SELECT * FROM classrooms WHERE id_floors = '{}';'''.format(floor_id))
-
-        print(classrooms)
 
         if classrooms == False:
             return {'status': 'failed', 'error': 'Could not get classrooms from database'}
