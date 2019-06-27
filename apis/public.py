@@ -241,8 +241,6 @@ class Floor(Resource):
         if len(classrooms) < 1:
             return {'status': 'failed', 'error': 'Floor with id {} has no classrooms'.format(floor_id)}
 
-        return {'classrooms': str(classrooms)}
-
         for classroom in classrooms:
             classroomdict = dict()
             classroomdict['classcode'] = classroom[0]
