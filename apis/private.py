@@ -392,5 +392,5 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
-        x.stop()
+        x._stop()
         return {'status': 'ok', 'message': 'Sample data generation stopped'}
