@@ -387,7 +387,7 @@ class SampleData(Resource):
     def get(self):
         global x
         global stop
-        if stop = False
+        if not stop:
             return {'status': 'ok', 'message': 'Sample data generation was already started'}
         stop = False
         x = threading.Thread(target=generate_sample_data)
@@ -404,7 +404,7 @@ class SampleData(Resource):
     def get(self):
         global x
         global stop
-        if stop = True
+        if stop:
             return {'status': 'ok', 'message': 'Sample data generation was already stopped'}
         stop = True
         x.join()
