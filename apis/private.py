@@ -41,7 +41,8 @@ def generate_sample_data():
 
         time.sleep(19)
 
-x = threading.Thread(target=generate_sample_data, daemon=True)
+stop_threads = False
+x = threading.Thread(target=generate_sample_data)
 
 def token_required(f):
     @wraps(f)
@@ -384,6 +385,7 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
+        global stop_threads 
         stop_threads = False
         x.start()
         return {'status': 'ok', 'message': 'Sample data generation started'}
@@ -396,6 +398,7 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
+        global stop_threads 
         stop_threads = True
         x.join()
         return {'status': 'ok', 'message': 'Sample data generation stopped'}
