@@ -291,6 +291,8 @@ class SampleBuilding(Resource):
     @api.response(401, 'Unauthorized')
     def get(self):
 
+        url = 'http://localhost'
+
         try:
             request_access = {'uid': 'debug', 'shared_secret': 'secret', 'type': 'device'}
             r = requests.post('{}/access/private'.format(url), json=request_access)
