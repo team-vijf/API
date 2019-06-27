@@ -4,3 +4,5 @@ flask-restplus
 psycopg2
 psycopg2-binary
 pyopenssl
+requests
+threading

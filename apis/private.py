@@ -3,6 +3,7 @@ from core import db
 from functools import wraps
 from flask import request
 import sys
+import requests
 
 api = Namespace('Private', description='The private side of the Lokaalbezetting API')
 
@@ -280,3 +281,69 @@ class Floorplan(Resource):
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
 
         return {'status': 'ok', 'floorplan': result[0][0]}
+
+@api.route('/debug/create_hl15')
+class SampleBuilding(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    def get(self):
+
+        try:
+            request_access = {'uid': 'debug', 'shared_secret': 'secret', 'type': 'device'}
+            r = requests.post('{}/access/private'.format(url), json=request_access)
+            r_reply = json.loads(r.text)
+
+            auth_header = {'X-API-KEY': r_reply['token']} 
+
+            building = {'name': 'HL18', 'streetname': 'Heidelberglaan', 'buildingnumber': 15}
+            r = requests.post('{}/private/buildings/new'.format(url), json=building, headers=auth_header)
+            r_reply = json.loads(r.text)
+
+            if r_reply['status'] == 'failed':
+
+                if 'exists' in r_reply['error']:
+
+                    r = requests.get('{}/public/occupation/buildings'.format(url), headers=auth_header)
+                    r_reply = json.loads(r.text)
+
+                    for line in r_reply['buildings']:
+                        if line['name'] == building['name']:
+                            building_uuid = line['id']
+
+            else:
+
+                building_uuid = r_reply['created']['id']
+
+            r = requests.post('{}/private/floors/new'.format(url), json={'building_id': building_uuid, 'floor_number': '4'}, headers=auth_header)
+            r_reply = json.loads(r.text)
+
+            if r_reply['status'] == 'failed':
+
+                if 'exists' in r_reply['error']:
+
+                    r = requests.get('{}/public/occupation/buildings'.format(url), headers=auth_header)
+                    r_reply = json.loads(r.text)
+
+                    for line in r_reply['buildings']:
+                        if line['id'] == building_uuid:
+                            for floor in line['floors']:
+                                if floor['floornumber'] == 4:
+                                    floor_uuid = floor['id']
+
+            else:
+
+                floor_uuid = r_reply['created']['id']
+
+            classrooms = ["HL15-4.064", "HL15-4.062", "HL15-4.060", "HL15-5.052", "HL15-4.070", "HL15-4.072", "HL15-4.074", "HL15-4.066", "HL15-4.056", "HL15-4.085", "HL15-4.083", "HL15-4.090", "HL15-4.092", "HL15-4.044", "HL15-4.091", "HL15-4.043", "HL15-4.101", "HL15-4.037", "HL15-4.030", "HL15-4.028", "HL15-4.026", "HL15-4.094", "HL15-4.096", "HL15-4.098", "HL15-4.104", "HL15-4.042", "HL15-4.036", "HL15-4.038", "HL15-4.114", "HL15-4.118", "HL15-4.009", "HL15-4.007", "HL15-4.005", "HL15-4.002", "HL15-4.008", "HL15-4.014", "HL15-4.018", "HL15-4.020"]
+
+            for classroom in classrooms:
+                r = requests.post('{}/private/classrooms/new'.format(url), json={'classcode': classroom, 'floor_id': floor_uuid}, headers=auth_header)
+                r_reply = json.loads(r.text)
+
+            return {'status': 'ok'}
+
+        except Exception as err:
+            return {'status': 'failed', 'error': str(err)}
