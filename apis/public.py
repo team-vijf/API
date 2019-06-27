@@ -223,20 +223,23 @@ class Floor(Resource):
         
         floors = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
 
-        print(floors)
         sys.stdout.write(str(floors))
+        sys.stdout.flush()
 
         if floors == False:
             return {'status': 'failed', 'error': 'Could not get floors from database'}
 
-        if len(floors[0]) < 1:
+        if len(floors) < 1:
             return {'status': 'failed', 'error': 'Floor with id {} does not exist'.format(floor_id)}
 
-        floor_id = floors[0][0]
-        floor_number = int(floors[0][1])
+        floor_id = floors[0]
+        floor_number = int(floors[1])
         classrooms = []
 
         classrooms = database.query('''SELECT * FROM classrooms WHERE id_floors = '{}';'''.format(floor_id))
+
+        sys.stdout.write(str(classrooms))
+        sys.stdout.flush()
 
         if classrooms == False:
             return {'status': 'failed', 'error': 'Could not get classrooms from database'}
