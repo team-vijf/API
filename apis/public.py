@@ -222,7 +222,6 @@ class Floor(Resource):
         database = db.Database()
         
         floors = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(floor_id))
-        return {'floor': str(floors)}
 
         if floors == False:
             return {'status': 'failed', 'error': 'Could not get floors from database'}
@@ -230,9 +229,9 @@ class Floor(Resource):
         if len(floors) < 1:
             return {'status': 'failed', 'error': 'Floor with id {} does not exist'.format(floor_id)}
 
-        floor_id = floors[0]
-        floor_number = int(floors[1])
-        classrooms = []
+        floor_id = floors[0][0]
+        floor_number = int(floors[0][1])
+        classrooms_object = []
 
         classrooms = database.query('''SELECT * FROM classrooms WHERE id_floors = '{}';'''.format(floor_id))
 
@@ -241,6 +240,8 @@ class Floor(Resource):
 
         if len(classrooms) < 1:
             return {'status': 'failed', 'error': 'Floor with id {} has no classrooms'.format(floor_id)}
+
+        return {'classrooms': str(classrooms)}
 
         for classroom in classrooms:
             classroomdict = dict()
@@ -259,9 +260,9 @@ class Floor(Resource):
 
             classroomdict['free'] = free
 
-            classrooms.append(classroomdict)
+            classrooms_object.append(classroomdict)
 
-        return {'status': 'ok', 'id': floor_id, 'classrooms': classrooms}
+        return {'status': 'ok', 'id': floor_id, 'classrooms': classrooms_object}
 
 
 
