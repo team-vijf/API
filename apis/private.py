@@ -33,9 +33,6 @@ def generate_sample_data():
             break
         classrooms = database.query('''SELECT classcode FROM classrooms;''')
         for classroom in classrooms:
-            global stop
-            if stop:
-                break
             free = random.choice([0,1])
             if free == 0:
 
