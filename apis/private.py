@@ -41,7 +41,7 @@ def generate_sample_data():
 
         time.sleep(19)
 
-x = threading.Thread(target=generate_sample_data)
+x = threading.Thread(target=generate_sample_data, daemon=True)
 
 def token_required(f):
     @wraps(f)
