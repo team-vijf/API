@@ -305,6 +305,11 @@ class Floorplan(Resource):
 
         return {'status': 'ok', 'floorplan': result[0][0]}
 
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+    @api.expect(newFloorplan)
     def put(self):
 
         if 'floorplan' not in api.payload or 'floor_id' not in api.payload:
