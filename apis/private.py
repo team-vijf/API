@@ -1,7 +1,7 @@
 from flask_restplus import Namespace, Resource, fields
 from core import db
 from functools import wraps
-from flask import request
+from flask import request, Response
 import sys
 import requests
 import json
@@ -21,16 +21,11 @@ sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nes
 
 newFloorplan = api.model('New Floorplan', {'floor_id': fields.String('UUID of the floor this floorplan belongs to.'), 'floorplan': fields.String('Floorplan in XML form')})
 
-stop = True
-
 def generate_sample_data():
 
     database = db.Database()
 
     while True:
-        global stop
-        if stop:
-            break
         classrooms = database.query('''SELECT classcode FROM classrooms;''')
         for classroom in classrooms:
             free = random.choice([0,1])
@@ -42,6 +37,8 @@ def generate_sample_data():
                 continue
 
         time.sleep(19)
+
+x = threading.Thread(target=generate_sample_data, daemon=True)
 
 def token_required(f):
     @wraps(f)
@@ -365,7 +362,7 @@ class SampleBuilding(Resource):
 
                 floor_uuid = r_reply['created']['id']
 
-            classrooms = ["HL15-4.064", "HL15-4.062", "HL15-4.060", "HL15-5.052", "HL15-4.070", "HL15-4.072", "HL15-4.074", "HL15-4.066", "HL15-4.056", "HL15-4.085", "HL15-4.083", "HL15-4.090", "HL15-4.092", "HL15-4.044", "HL15-4.091", "HL15-4.043", "HL15-4.101", "HL15-4.037", "HL15-4.030", "HL15-4.028", "HL15-4.026", "HL15-4.094", "HL15-4.096", "HL15-4.098", "HL15-4.104", "HL15-4.042", "HL15-4.036", "HL15-4.038", "HL15-4.114", "HL15-4.118", "HL15-4.009", "HL15-4.007", "HL15-4.005", "HL15-4.002", "HL15-4.008", "HL15-4.014", "HL15-4.018", "HL15-4.020"]
+            classrooms = ["HL15-4.064", "HL15-4.062", "HL15-4.060", "HL15-4.052", "HL15-4.070", "HL15-4.072", "HL15-4.074", "HL15-4.066", "HL15-4.056", "HL15-4.085", "HL15-4.083", "HL15-4.090", "HL15-4.092", "HL15-4.044", "HL15-4.091", "HL15-4.043", "HL15-4.101", "HL15-4.037", "HL15-4.030", "HL15-4.028", "HL15-4.026", "HL15-4.094", "HL15-4.096", "HL15-4.098", "HL15-4.104", "HL15-4.042", "HL15-4.036", "HL15-4.038", "HL15-4.114", "HL15-4.118", "HL15-4.009", "HL15-4.007", "HL15-4.018", "HL15-4.002", "HL15-4.008", "HL15-4.014", "HL15-4.018", "HL15-4.020"]
 
             for classroom in classrooms:
                 r = requests.post('{}/private/classrooms/new'.format(url), json={'classcode': classroom, 'floor_id': floor_uuid}, headers=auth_header)
@@ -384,12 +381,6 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
-        global x
-        global stop
-        if not stop:
-            return {'status': 'ok', 'message': 'Sample data generation was already started'}
-        stop = False
-        x = threading.Thread(target=generate_sample_data)
         x.start()
         return {'status': 'ok', 'message': 'Sample data generation started'}
 
@@ -401,10 +392,5 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
-        global x
-        global stop
-        if stop:
-            return {'status': 'ok', 'message': 'Sample data generation was already stopped'}
-        stop = True
-        x.join()
+        x.stop()
         return {'status': 'ok', 'message': 'Sample data generation stopped'}
