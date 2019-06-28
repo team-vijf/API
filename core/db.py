@@ -68,6 +68,18 @@ class Database():
             sys.stderr.write('Database Error: {}'.format(err))
             return False
 
+    def updateFloorplan(self, floorPlan, floorId):
+
+        try:
+            self.connect()
+            cur = self.connection.cursor()
+
+            cur.execute('''UPDATE floorplans set floorplan = '{}' WHERE id_floors = '{}';'''.format(floorPlan, floorId))
+
+        except Exception as err:
+            sys.stderr.write('Database Error: {}'.format(err))
+            return False
+
     def query(self, query):
 
         try:

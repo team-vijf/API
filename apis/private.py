@@ -305,6 +305,33 @@ class Floorplan(Resource):
 
         return {'status': 'ok', 'floorplan': result[0][0]}
 
+    def put(self):
+
+        if 'floorplan' not in api.payload or 'floor_id' not in api.payload:
+            return {'status': 'failed', 'error': 'You have to provide floor_id and the floorplan'}
+
+        database = db.Database()
+
+        try:
+            result = database.query('''SELECT * FROM floors WHERE id = '{}';'''.format(api.payload['floor_id']))
+            if len(result) < 1:
+                return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(api.payload['floor_id'])}
+        except:
+            return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(api.payload['floor_id'])}
+
+        try:
+            result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
+            if len(result) < 1:
+                return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(api.payload['floor_id'])}
+        except:
+            return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(api.payload['floor_id'])}
+
+        database.updateFloorplan(floorPlan=api.payload['floorplan'].replace("'", "''"), floorId=api.payload['floor_id'])
+
+        result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
+
+        return {'status': 'ok', 'floorplan': result[0][0]}
+
 @api.route('/debug/create_hl15')
 class SampleBuilding(Resource):
 
