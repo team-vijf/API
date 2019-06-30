@@ -41,7 +41,7 @@ def generate_sample_data():
             elif free == 1:
                 continue
 
-        time.sleep(20)
+        time.sleep(15)
 
 def token_required(f):
     @wraps(f)
@@ -417,6 +417,7 @@ class SampleData(Resource):
     @api.response(401, 'Unauthorized')
     def get(self):
         global stop_thread
+        global x
         if not stop_thread:
             return {'status': 'failed', 'error': 'Sample data generation was already started'}
         stop_thread = False
@@ -433,6 +434,7 @@ class SampleData(Resource):
     @api.response(401, 'Unauthorized')
     def get(self):
         global stop_thread
+        global x
         if stop_thread:
             return {'status': 'failed', 'error': 'Sample data generation was already stopped stopped'}
         stop_thread = True
