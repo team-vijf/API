@@ -21,11 +21,16 @@ sensor_list = api.model('Sensor Values List', {'sensors': fields.List(fields.Nes
 
 newFloorplan = api.model('New Floorplan', {'floor_id': fields.String('UUID of the floor this floorplan belongs to.'), 'floorplan': fields.String('Floorplan in XML form')})
 
+stop_thread = True
+
 def generate_sample_data():
 
     database = db.Database()
+    global stop_thread
 
     while True:
+        if stop_thread:
+            break
         classrooms = database.query('''SELECT classcode FROM classrooms;''')
         for classroom in classrooms:
             free = random.choice([0,1])
@@ -36,9 +41,7 @@ def generate_sample_data():
             elif free == 1:
                 continue
 
-        time.sleep(19)
-
-x = threading.Thread(target=generate_sample_data, daemon=True)
+        time.sleep(20)
 
 def token_required(f):
     @wraps(f)
@@ -413,6 +416,11 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
+        global stop_thread
+        if not stop_thread:
+            return {'status': 'failed', 'error': 'Sample data generation was already started'}
+        stop_thread = False
+        x = threading.Thread(target=generate_sample_data, daemon=True)
         x.start()
         return {'status': 'ok', 'message': 'Sample data generation started'}
 
@@ -424,5 +432,9 @@ class SampleData(Resource):
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
     def get(self):
-        x.stop()
+        global stop_thread
+        if stop_thread:
+            return {'status': 'failed', 'error': 'Sample data generation was already stopped stopped'}
+        stop_thread = True
+        x.join()
         return {'status': 'ok', 'message': 'Sample data generation stopped'}
