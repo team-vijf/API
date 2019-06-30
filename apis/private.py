@@ -37,11 +37,13 @@ def generate_sample_data():
             if free == 0:
 
                 addValue = database.query('''INSERT INTO occupation ( classcode, free, time ) VALUES ( '{}', true, Now() ) ;'''.format(classroom[0]))
+                addValue = database.query('''INSERT INTO occupation ( classcode, free, time ) VALUES ( '{}', true, Now() ) ;'''.format(classroom[0]))
+                addValue = database.query('''INSERT INTO occupation ( classcode, free, time ) VALUES ( '{}', true, Now() ) ;'''.format(classroom[0]))
 
             elif free == 1:
                 continue
 
-        time.sleep(15)
+        time.sleep(60)
 
 def token_required(f):
     @wraps(f)
