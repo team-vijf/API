@@ -335,8 +335,10 @@ class Export(Resource):
         classrooms = []
 
         result = database.query('''SELECT DISTINCT(classcode) FROM occupation;''')[0]
+        if len(result) < 1:
+            return {'status': 'failed', 'error': 'There is no occupation data.'}
 
         for classroom in result:
-            classrooms.append(classroom[0])
+            classrooms.append(classroom)
 
         return {'status': 'ok', 'export': classrooms}
