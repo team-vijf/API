@@ -333,6 +333,6 @@ class Export(Resource):
 
         database = db.Database()
 
-        export = database.query('''SELECT classcode, time FROM occupation;''')
+        classrooms = database.query('''SELECT classcode FROM occupation;''')
 
-        return {'status': 'ok', 'export': str(export)}
+        return {'status': 'ok', 'export': str(classrooms)}
