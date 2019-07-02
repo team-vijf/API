@@ -13,7 +13,7 @@ api.init_app(app)
 @api.representation('text/csv')
 def data_csv(data, code, headers):
     '''Get result in csv '''
-    resp = make_response(convert_data(data), code)
+    resp = Flask.make_response(convert_data(data), code)
     resp.headers.extend(headers)
     return resp
 
