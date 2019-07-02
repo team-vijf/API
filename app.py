@@ -16,7 +16,7 @@ def data_csv(data, code, headers):
     '''Get result in csv '''
 
     body = convert_data(data)
-    if type(body) == dict
+    if type(body) == dict:
         return body
 
     resp = make_response(body, code)
