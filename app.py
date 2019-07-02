@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, make_response
 from flask_restplus import Api, Resource, fields
 from flask_cors import CORS
 from apis import api
@@ -13,7 +13,7 @@ api.init_app(app)
 @api.representation('text/csv')
 def data_csv(data, code, headers):
     '''Get result in csv '''
-    resp = Flask.make_response(convert_data(data), code)
+    resp = make_response(convert_data(data), code)
     resp.headers.extend(headers)
     return resp
 
