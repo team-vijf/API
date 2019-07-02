@@ -322,6 +322,16 @@ class Floorplan(Resource):
 
         return {'status': 'ok', 'floorplan': str(result[0][0])}
 
+@api.representation('text/csv')
+def data_csv(data, code, headers):
+    '''Get result in csv '''
+    resp = make_response(convert_data(data), code)
+    resp.headers.extend(headers)
+    return resp
+
+def convert_data(data):
+    return data
+
 @api.route('/export')
 class Export(Resource):
 
@@ -351,13 +361,12 @@ class Export(Resource):
 
             classrooms[classroom] = detections_formatted
 
-        csv_response = '''classroom, time of detection'''
+        # csv_response = '''classroom, time of detection'''
 
-        for classroom in classrooms:
-            for detection in classrooms[classroom]:
-                csv_response += '''
-                '''
-                csv_response += '{},{}'.format(classroom, detection)
+        # for classroom in classrooms:
+        #     for detection in classrooms[classroom]:
+        #         csv_response += '''\n'''
+        #         csv_response += '{},{}'.format(classroom, detection)
 
 
-        return {'status': 'ok', 'csv': csv_response}
+        return {'status': 'ok', 'export': classrooms}
