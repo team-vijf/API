@@ -16,11 +16,14 @@ def data_csv(data, code, headers):
     '''Get result in csv '''
 
     body = convert_data(data)
-    return body
+    if 'access' in body:
+        return 'This endpoint requires an access token'
+    elif 'error' in body:
+        return 'Unexpected error'
 
-    # resp = make_response(body, code)
-    # resp.headers.extend(headers)
-    # return resp
+    resp = make_response(body, code)
+    resp.headers.extend(headers)
+    return resp
 
 def convert_data(data):
 
