@@ -332,7 +332,11 @@ class Export(Resource):
     def get(self):
 
         database = db.Database()
+        classrooms = []
 
-        classrooms = database.query('''SELECT classcode FROM occupation;''')
+        result = database.query('''SELECT DISTINCT(classcode) FROM occupation;''')[0]
 
-        return {'status': 'ok', 'export': str(classrooms)}
+        for classroom in result:
+            classrooms.append(classroom[0])
+
+        return {'status': 'ok', 'export': classrooms}
