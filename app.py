@@ -16,12 +16,11 @@ def data_csv(data, code, headers):
     '''Get result in csv '''
 
     body = convert_data(data)
-    if 'classcode' not in body:
-        return body
+    return body
 
-    resp = make_response(body, code)
-    resp.headers.extend(headers)
-    return resp
+    # resp = make_response(body, code)
+    # resp.headers.extend(headers)
+    # return resp
 
 def convert_data(data):
 
