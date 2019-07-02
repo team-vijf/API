@@ -5,6 +5,7 @@ from apis import api
 from core import db
 from core import api_vars
 import secrets
+import json
 
 app = Flask(__name__, template_folder='html')
 CORS(app)
@@ -18,6 +19,17 @@ def data_csv(data, code, headers):
     return resp
 
 def convert_data(data):
+
+    converted_data = json.loads(data)
+
+    if converted_data['status'] == 'failed':
+        return data
+    else:
+        try:
+            data = converted_data['export']
+        except:
+            return data
+
     if type(data) == dict:
         csv = '''classcode,time of detection
 '''

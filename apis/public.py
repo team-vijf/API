@@ -5,6 +5,7 @@ from flask import request
 from core import api_vars
 import sys
 from datetime import datetime
+import json
 
 api = Namespace('Public', description='The public side of the Lokaalbezetting API')
 
