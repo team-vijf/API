@@ -333,6 +333,7 @@ class Export(Resource):
 
         database = db.Database()
         classrooms = []
+        classroom_data = dict()
 
         result = database.query('''SELECT DISTINCT(classcode) FROM occupation;''')
         if len(result) < 1:
@@ -341,4 +342,7 @@ class Export(Resource):
         for classroom in result:
             classrooms.append(classroom[0])
 
-        return {'status': 'ok', 'export': classrooms}
+        for classroom in classrooms:
+            classroom_data[classroom] = database.query('''SELECT time FROM occupation WHERE classcode = '{}';'''.format(classroom))
+
+        return {'status': 'ok', 'export': classroom_data}
