@@ -18,7 +18,17 @@ def data_csv(data, code, headers):
     return resp
 
 def convert_data(data):
-    return data
+    if type(data) == dict:
+        csv = '''classcode,time of detection
+'''
+        for classroom in data:
+            for detection in data[classroom]:
+                row = '''{},{}
+'''.format(classroom, detection)
+        return csv
+
+    else:
+        return None
 
 # We define models so we can define what the API has to expect for certain endpoints
 private_access_request = api.model('Private Access Request', {'uid': fields.String('A unique identifier.'), 'shared_secret': fields.String('The shared secret.'), 'type': fields.String('Can either be device or app.')})
