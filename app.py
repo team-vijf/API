@@ -20,7 +20,7 @@ def data_csv(data, code, headers):
 
 def convert_data(data):
 
-    converted_data = json.loads(data)
+    converted_data = json.loads(str(data))
 
     if converted_data['status'] == 'failed':
         return data
