@@ -344,7 +344,11 @@ class Export(Resource):
 
         for classroom in classrooms.keys():
             detections = database.query('''SELECT time FROM occupation WHERE classcode = '{}';'''.format(classroom))
-            classrooms[classroom] = detections
+            detections_formatted = []
+            for detection in detections:
+                detections_formatted.append(detection.strftime("%d-%b-%Y (%H:%M:%S.%f)"))
+
+            classrooms[classroom] = detections_formatted
 
 
         return {'status': 'ok', 'export': classrooms}
