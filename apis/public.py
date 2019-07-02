@@ -322,15 +322,7 @@ class Floorplan(Resource):
 
         return {'status': 'ok', 'floorplan': str(result[0][0])}
 
-@api.representation('text/csv')
-def data_csv(data, code, headers):
-    '''Get result in csv '''
-    resp = make_response(convert_data(data), code)
-    resp.headers.extend(headers)
-    return resp
 
-def convert_data(data):
-    return data
 
 @api.route('/export')
 class Export(Resource):

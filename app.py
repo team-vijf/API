@@ -10,6 +10,16 @@ app = Flask(__name__, template_folder='html')
 CORS(app)
 api.init_app(app)
 
+@api.representation('text/csv')
+def data_csv(data, code, headers):
+    '''Get result in csv '''
+    resp = make_response(convert_data(data), code)
+    resp.headers.extend(headers)
+    return resp
+
+def convert_data(data):
+    return data
+
 # We define models so we can define what the API has to expect for certain endpoints
 private_access_request = api.model('Private Access Request', {'uid': fields.String('A unique identifier.'), 'shared_secret': fields.String('The shared secret.'), 'type': fields.String('Can either be device or app.')})
 public_access_request = api.model('Public Access Request', {'email': fields.String('Your HU Email.')})
