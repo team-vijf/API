@@ -320,3 +320,19 @@ class Floorplan(Resource):
             return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
 
         return {'status': 'ok', 'floorplan': str(result[0][0])}
+
+@api.route('/export')
+class Export(Resource):
+
+    @api.doc(security=['Token'])
+    @token_required
+    @api.response(200, 'Success')
+    @api.response(401, 'Unauthorized')
+
+    def get(self):
+
+        database = db.Database()
+
+        export = database.query('''SELECT classcode, time FROM occupation;''')
+
+        return {'status': 'ok', 'export': str(export)}
