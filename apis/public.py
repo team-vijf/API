@@ -334,7 +334,7 @@ class Export(Resource):
         database = db.Database()
         classrooms = []
 
-        result = database.query('''SELECT DISTINCT(classcode) FROM occupation;''')[0]
+        result = database.query('''SELECT DISTINCT(classcode) FROM occupation;''')
         if len(result) < 1:
             return {'status': 'failed', 'error': 'There is no occupation data.'}
 
