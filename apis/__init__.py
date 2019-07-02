@@ -13,7 +13,7 @@ authorizations = {
 }
 
 motd = '''
-<img src="https://buddygodutch.nl/wp-content/uploads/2016/08/Hogeschool-Utrecht.png">
+<img src="https://i.imgur.com/N27tZ04.png">
 <h3>Welkom bij de Lokaalbezetting API!</h3>
 
 <p>
