@@ -339,6 +339,6 @@ class Export(Resource):
             return {'status': 'failed', 'error': 'There is no occupation data.'}
 
         for classroom in result:
-            classrooms.append(classroom)
+            classrooms.append(classroom[0])
 
         return {'status': 'ok', 'export': classrooms}
