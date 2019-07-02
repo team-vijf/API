@@ -354,12 +354,4 @@ class Export(Resource):
 
             classrooms[classroom] = detections_formatted
 
-        # csv_response = '''classroom, time of detection'''
-
-        # for classroom in classrooms:
-        #     for detection in classrooms[classroom]:
-        #         csv_response += '''\n'''
-        #         csv_response += '{},{}'.format(classroom, detection)
-
-
         return {'status': 'ok', 'export': classrooms}

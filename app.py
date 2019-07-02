@@ -17,9 +17,18 @@ def data_csv(data, code, headers):
 
     body = convert_data(data)
     if 'access' in body:
-        return 'This endpoint requires an access token'
+        resp = make_response('This endpoint requires an access token', code)
+        resp.headers.extend(headers)
+        return resp
     elif 'error' in body:
-        return 'Unexpected error'
+        resp = make_response('This endpoint requires an access token', code)
+        resp.headers.extend(headers)
+        return resp
+    
+    if 'time of detection' not in body:
+        resp = make_response('This endpoint has no CSV output', code)
+        resp.headers.extend(headers)
+        return resp
 
     resp = make_response(body, code)
     resp.headers.extend(headers)
