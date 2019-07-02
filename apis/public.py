@@ -329,7 +329,7 @@ class Export(Resource):
     @token_required
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
-    @api.header('X-Collection', type=[str], collectionType='csv')
+
 
     def get(self):
 
@@ -347,9 +347,15 @@ class Export(Resource):
             detections = database.query('''SELECT time FROM occupation WHERE classcode = '{}';'''.format(classroom))
             detections_formatted = []
             for detection in detections:
-                detections_formatted.append(detection[0].strftime("%d-%b-%Y (%H:%M:%S.%f)"))
+                detections_formatted.append(detection.strftime("%d-%b-%Y (%H:%M:%S.%f)"))
 
             classrooms[classroom] = detections_formatted
 
+        csv_response = '''classroom, time of detection'''
 
-        return {'status': 'ok', 'export': classrooms}
+        for classroom in classrooms:
+            for detection in classrooms[classroom]:
+                csv_response += '\n{},{}'.format(classroom, detection)
+
+
+        return {'status': 'ok', 'csv': csv_response}
