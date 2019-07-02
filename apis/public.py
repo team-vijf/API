@@ -4,6 +4,7 @@ from functools import wraps
 from flask import request
 from core import api_vars
 import sys
+from datetime import datetime
 
 api = Namespace('Public', description='The public side of the Lokaalbezetting API')
 
@@ -332,17 +333,18 @@ class Export(Resource):
     def get(self):
 
         database = db.Database()
-        classrooms = []
-        classroom_data = dict()
+        classrooms = dict()
 
         result = database.query('''SELECT DISTINCT(classcode) FROM occupation;''')
         if len(result) < 1:
             return {'status': 'failed', 'error': 'There is no occupation data.'}
 
         for classroom in result:
-            classrooms.append(classroom[0])
+            classrooms[classroom[0]] = []
 
-        for classroom in classrooms:
-            classroom_data[classroom] = database.query('''SELECT time FROM occupation WHERE classcode = '{}';'''.format(classroom))
+        for classroom in classrooms.keys():
+            detections = database.query('''SELECT time FROM occupation WHERE classcode = '{}';'''.format(classroom))
+            classrooms[classroom] = detections
 
-        return {'status': 'ok', 'export': classroom_data}
+
+        return {'status': 'ok', 'export': classrooms}
