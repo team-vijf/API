@@ -25,6 +25,7 @@ def convert_data(data):
             for detection in data[classroom]:
                 row = '''{},{}
 '''.format(classroom, detection)
+                csv += row
         return csv
 
     else:
