@@ -329,6 +329,7 @@ class Export(Resource):
     @token_required
     @api.response(200, 'Success')
     @api.response(401, 'Unauthorized')
+    @api.representation('text/csv')
 
     def get(self):
 
