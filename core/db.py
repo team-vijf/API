@@ -19,6 +19,10 @@ class Database():
                                            dbname=api_vars.DB_NAME)
         self.connection.autocommit = True
 
+    def close(self):
+        
+        self.connection.close()
+
     def addBuilding(self, name, streetName, buildingNumber):
 
         try:

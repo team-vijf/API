@@ -23,6 +23,7 @@ def token_required(f):
 
         database = db.Database()
         matchedTokens = database.readToken(token=token, namespace='public')
+        database.close()
         if matchedTokens == False:
             return {'status': 'failed', 'error': 'Could not check if token exists in database'}
         else:
@@ -46,6 +47,7 @@ class Classrooms(Resource):
 
         database = db.Database()
         classroomsQuery = database.query('''SELECT classcode FROM classrooms;''')
+        database.close()
 
         if classroomsQuery == False:
             return {'status': 'failed', 'error': 'Could not get classrooms from database.'}
@@ -133,6 +135,8 @@ class Buildings(Resource):
                     if floor['id'] == classroom[1]:
                         floor['classrooms'].append(classroomdict)
 
+        database.close()
+
         return {'status': 'ok', 'buildings': totalObject}
 
 @api.route('/occupation/building/<string:building_id>')
@@ -209,6 +213,8 @@ class Building(Resource):
 
         building = totalObject[0]
 
+        database.close()
+
         return {'status': 'ok', 'id': building['id'], 'name': building['name'], 'streetname': building['streetname'], 'buildingnumber': building['buildingnumber'], 'floors': building['floors']}
 
 @api.route('/occupation/floor/<string:floor_id>')
@@ -262,6 +268,8 @@ class Floor(Resource):
 
             classrooms_object.append(classroomdict)
 
+        database.close()
+
         return {'status': 'ok', 'id': floor_id, 'classrooms': classrooms_object}
 
 
@@ -299,6 +307,8 @@ class Classroom(Resource):
         except:
             free = "Unknown"
         
+        database.close()
+
         return {'status': 'ok', 'classcode': classcode, 'free': free}
 
 @api.route('/floorplan/<string:floor_id>')
@@ -320,6 +330,8 @@ class Floorplan(Resource):
                 return {'status': 'failed', 'error': 'There is no floorplan for floor with UUID {}.'.format(floor_id)}
         except:
             return {'status': 'failed', 'error': 'Floor with UUID {} does not exist'.format(floor_id)}
+
+        database.close()
 
         return {'status': 'ok', 'floorplan': str(result[0][0])}
 
@@ -353,5 +365,7 @@ class Export(Resource):
                 detections_formatted.append(detection[0].strftime("%x %X"))
 
             classrooms[classroom] = detections_formatted
+
+        database.close()
 
         return {'status': 'ok', 'export': classrooms}

@@ -45,6 +45,8 @@ def generate_sample_data():
 
         time.sleep(60)
 
+    database.close()
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -66,7 +68,7 @@ def token_required(f):
             if len(matchedTokens) == 0:
                 return {'status': 'failed', 'error': 'Incorrect token. Are you using a private access token?'}, 401
         
-
+        database.close()
         return f(*args, **kwargs)
 
     return decorated
@@ -106,12 +108,13 @@ class sensorValues(Resource):
 
             addValue = database.query('''INSERT INTO occupation ( classcode, free, time ) VALUES ( '{}', true, Now() ) ;'''.format(location))
             if addValue == False:
+                database.close()
                 return {'status': 'failed', 'error': 'Could not insert sensor value in database.'}
 
             # test = database.query('''select count(*) from occupation WHERE classcode = '{}' AND time > now() - interval '60 seconds';'''.format(location))
 
             # print(test[0][0])
-
+            database.close()
             return {'status': 'ok'}
 
 
@@ -128,6 +131,7 @@ class config(Resource):
 
         database = db.Database()
         config = database.readConfig(token=token)
+        database.close()
 
         if config == False:
             return {'status': 'failed', 'error': 'Could not retrieve config from database'}
@@ -153,13 +157,15 @@ class setLocation(Resource):
 
         try:
             result = database.query('''SELECT * FROM classrooms WHERE classcode = '{}';'''.format(api.payload['location']))
+            
             if len(result) < 1:
                 return {'status': 'failed', 'error': 'Classroom with classcode: {} does not exist'.format(api.payload['location'])}
         except:
             return {'status': 'failed', 'error': 'Classroom with classcode: {} does not exist'.format(api.payload['location'])}
 
         setConfig = database.setLocation(token=token, location=api.payload['location'])
-        
+        database.close()
+
         if setConfig == False:
             return {'status': 'failed', 'error': 'Could not set location.'}
 
@@ -194,6 +200,7 @@ class newBuilding(Resource):
 
         result = database.query('''SELECT * FROM buildings WHERE name = '{}';'''.format(api.payload['name']))
         created = {'id': result[0][0], 'name': result[0][1], 'street_name': result[0][2], 'building_number': result[0][3]}
+        database.close()
 
         return {'status': 'ok', 'created': created}
 
@@ -232,6 +239,7 @@ class newBuilding(Resource):
 
         result = database.query('''SELECT * FROM floors WHERE floornumber = '{}' AND id_buildings = '{}';'''.format(api.payload['floor_number'], api.payload['building_id']))
         created = {'id': result[0][0], 'floor_number': result[0][1], 'building_id': result[0][2]}
+        database.close()
 
         return {'status': 'ok', 'created': created}
 
@@ -271,6 +279,7 @@ class newClassroom(Resource):
 
         result = database.query('''SELECT * FROM classrooms WHERE classcode = '{}' AND id_floors = '{}';'''.format(api.payload['classcode'], api.payload['floor_id']))
         created = {'classcode': result[0][0], 'floor_id': result[0][1]}
+        database.close()
 
         return {'status': 'ok', 'created': created}
 
@@ -307,6 +316,7 @@ class Floorplan(Resource):
         database.addFloorplan(floorPlan=api.payload['floorplan'].replace("'", "''"), floorId=api.payload['floor_id'])
 
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
+        database.close()
 
         return {'status': 'ok', 'floorplan': result[0][0]}
 
@@ -339,6 +349,7 @@ class Floorplan(Resource):
         database.updateFloorplan(floorPlan=api.payload['floorplan'].replace("'", "''"), floorId=api.payload['floor_id'])
 
         result = database.query('''SELECT * FROM floorplans WHERE id_floors = '{}';'''.format(api.payload['floor_id']))
+        database.close()
 
         return {'status': 'ok', 'floorplan': result[0][0]}
 
